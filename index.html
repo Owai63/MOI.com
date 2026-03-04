@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Muhammad Owais Iqbal Malik — Embedded Systems Engineer</title>
+<title>Muhammad Owais Iqbal— Embedded Systems Engineer</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -57,14 +57,12 @@
     opacity: 0.5;
   }
 
-  /* Hide cursor on touch/coarse pointers */
   @media (hover: none), (pointer: coarse) {
     #cursor, #cursor-ring { display: none; }
     body { cursor: auto; }
     a, button, .exp-header, .cert-card, .gh-filter-btn { cursor: pointer; }
   }
 
-  /* ── Background ── */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -84,7 +82,6 @@
     pointer-events: none;
   }
 
-  /* ── Layout ── */
   .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -130,7 +127,6 @@
   }
   .nav-links a:hover { color: var(--accent); }
 
-  /* Hamburger */
   .nav-burger {
     display: none;
     flex-direction: column;
@@ -157,7 +153,6 @@
   .nav-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
   .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-  /* Mobile drawer */
   .nav-drawer {
     display: none;
     position: fixed; inset: 0;
@@ -279,7 +274,7 @@
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 28px 24px;
+    padding: 28px 20px;
     position: relative;
     overflow: hidden;
     transition: border-color 0.3s, transform 0.3s;
@@ -300,13 +295,18 @@
   .stat-card:nth-child(3)::before { background: var(--accent3); }
   .stat-card:nth-child(4)::before { background: #c77dff; }
 
+  /* ── FIXED: fluid font that never overflows the card ── */
   .stat-num {
     font-family: var(--display);
-    font-size: clamp(22px, 4vw, 42px);
+    font-size: clamp(18px, 3.8vw, 22px);
     font-weight: 800;
     line-height: 1;
     margin-bottom: 6px;
     color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
   .stat-card:nth-child(2) .stat-num { color: var(--accent2); }
   .stat-card:nth-child(3) .stat-num { color: var(--accent3); }
@@ -416,7 +416,7 @@
 
   /* ═══════════ GITHUB SECTION ═══════════ */
   .gh-section-note { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 28px; letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .gh-section-note::before { content: '//'; color: rgba(0,229,255,0.3); }
+  .gh-section-note::before { content: '·'; color: rgba(0,229,255,0.3); }
 
   .gh-skeleton-card { background: var(--surface); border: 1px solid var(--border); padding: 24px 26px; height: 160px; position: relative; overflow: hidden; }
   .gh-skeleton-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%); animation: shimmer 1.6s infinite; }
@@ -525,13 +525,6 @@
   .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* ════════════════════════════════════════════
-     RESPONSIVE BREAKPOINTS (improved)
-     - adds hamburger + drawer
-     - prevents overflow in grids
-     - keeps stats visible and adaptive
-  ════════════════════════════════════════════ */
-
   /* Tablet & down (<=1023px) */
   @media (max-width: 1023px) {
     .nav-links { display: none; }
@@ -540,17 +533,9 @@
     .hero-grid { grid-template-columns: 1fr; }
     .hero-bio { max-width: 100%; }
 
-    /* 4 stats in one row */
     .hero-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
     .stat-card { padding: 18px 12px; }
     .stat-label { font-size: 9px; }
-    .stat-num {
-      font-size: clamp(18px, 2.6vw, 30px);
-      line-height: 1.05;
-      display: inline-block;
-      max-width: 100%;
-    }
-    .stat-card { padding: 16px 10px; }
     .contact-grid { grid-template-columns: 1fr; gap: 36px; }
 
     .edu-block { grid-template-columns: 1fr; gap: 18px; padding: 28px; }
@@ -564,7 +549,6 @@
     #hero { padding-left: 20px; padding-right: 20px; }
     .hero-cta { gap: 10px; }
 
-    /* Stats become 2x2 */
     .hero-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-card { padding: 18px 14px; }
 
@@ -589,7 +573,6 @@
     footer { flex-direction: column; text-align: center; }
   }
 
-  /* Very small (<=359px) */
   @media (max-width: 359px) {
     .hero-tag::before { width: 20px; }
     .stat-label { font-size: 8px; letter-spacing: 0.03em; }
@@ -603,7 +586,6 @@
   <div class="glow glow-1"></div>
   <div class="glow glow-2"></div>
 
-  <!-- ✏️ BACKEND CONFIG — change your GitHub username here -->
   <script>const GH_USERNAME = 'owai63';</script>
 
   <!-- NAV -->
@@ -620,7 +602,6 @@
       <li><a href="#contact">Contact</a></li>
     </ul>
 
-    <!-- Hamburger for mobile -->
     <div class="nav-burger" id="nav-burger" onclick="toggleMenu()" aria-label="Toggle menu" role="button">
       <span></span><span></span><span></span>
     </div>
@@ -1141,9 +1122,7 @@
   })();
 
   function bindCursorTargets(){
-    // Skip if cursor hidden (touch devices)
     if (!cursor || !ring || window.matchMedia('(hover: none), (pointer: coarse)').matches) return;
-
     document.querySelectorAll('a,button,.exp-header,.stat-card,.gh-card,.gh-filter-btn,.cert-card,.nav-burger')
       .forEach(el => {
         el.addEventListener('mouseenter', () => {
@@ -1182,7 +1161,6 @@
       }
     });
   }, { threshold: 0.08 });
-
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
   /* ── Experience Accordion ── */
@@ -1205,11 +1183,7 @@
   let allRepos=[];
 
   function escHtml(s){
-    return String(s)
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function timeAgo(d){
@@ -1224,12 +1198,10 @@
   function filterRepos(type, btn){
     document.querySelectorAll('.gh-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
     let list = [...allRepos];
     if (type === 'fork') list = list.filter(r => r.fork);
     if (type === 'source') list = list.filter(r => !r.fork);
     if (type === 'starred') list = [...list].sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,12);
-
     renderRepos(list);
     bindCursorTargets();
   }
@@ -1240,7 +1212,6 @@
       grid.innerHTML = `<div class="gh-empty-state"><div class="gh-empty-icon">📭</div>No repositories match this filter.</div>`;
       return;
     }
-
     grid.innerHTML = repos.map(r => {
       const lang = r.language || '';
       const color = LANG_COLORS[lang] || 'var(--muted)';
@@ -1248,7 +1219,6 @@
         ? (r.description.length > 110 ? r.description.slice(0,110) + '…' : r.description)
         : '<em style="opacity:0.35">No description provided</em>';
       const topics = (r.topics || []).slice(0,4);
-
       return `<a class="gh-card" href="${escHtml(r.html_url)}" target="_blank" rel="noopener">
         <div class="gh-card-header">
           <div class="gh-card-name">${escHtml(r.name)}</div>
@@ -1275,7 +1245,6 @@
         fetch(`https://api.github.com/users/${encodeURIComponent(GH_USERNAME)}`),
         fetch(`https://api.github.com/users/${encodeURIComponent(GH_USERNAME)}/repos?per_page=100&sort=updated`)
       ]);
-
       if(!uRes.ok) throw new Error('GitHub API error');
       const user = await uRes.json();
       const repos = rRes.ok ? await rRes.json() : [];
@@ -1308,7 +1277,6 @@
   /* ── Certifications ── */
   function openCred(url){ if(url) window.open(url, '_blank', 'noopener'); }
 
-  // Re-bind hover targets after resize (for desktop->mobile transitions)
   window.addEventListener('resize', () => bindCursorTargets());
 </script>
 </body>
