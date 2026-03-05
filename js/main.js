@@ -824,3 +824,35 @@ window.addEventListener('load', () => {
     initCarousel('cf-track', 'cf-prev', 'cf-next', 'cf-dots', 3500);
   }, 200);
 });
+
+/* ══════════════════════════════════════════
+   MOBILE TAP-TO-FLIP (touch devices)
+══════════════════════════════════════════ */
+(function initMobileFlip() {
+  if (!window.matchMedia('(hover:none),(pointer:coarse)').matches) return;
+
+  /* ── Project cards ── */
+  document.querySelectorAll('.pc-flip').forEach(flip => {
+    flip.addEventListener('click', () => {
+      flip.classList.toggle('tapped');
+    });
+  });
+
+  /* ── Cert cards ── */
+  document.querySelectorAll('.cf').forEach(card => {
+    // Extract URL from the existing inline onclick, then remove it
+    const match = (card.getAttribute('onclick') || '').match(/openCred\('(.+?)'\)/);
+    const url   = match ? match[1] : null;
+    card.removeAttribute('onclick');
+
+    card.addEventListener('click', e => {
+      if (!card.classList.contains('tapped')) {
+        // First tap → flip to show skills
+        card.classList.add('tapped');
+      } else {
+        // Second tap anywhere → open credential URL
+        if (url) window.open(url, '_blank', 'noopener');
+      }
+    });
+  });
+})();

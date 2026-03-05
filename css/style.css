@@ -839,22 +839,25 @@ footer p    { font-family:var(--font-mo); font-size:12px; color:var(--mu); lette
   .nbtn        { display:flex !important; }
   .nstatus     { display:none; }
 }
+@media (hover:none),(pointer:coarse) {
+  .pc-hint::after  { content: 'Tap to see skills →'; }
+  .pc-hint         { visibility: hidden; position: relative; }
+  .pc-hint::after  { visibility: visible; position: absolute; left: 0; }
+  .cf .cff > div:last-child { content: 'Tap to reveal skills →'; }
+}
+
 @media (max-width:767px) {
   .tl          { padding-left:20px; }
   .tli::before { left:-26px; }
   .tli-hdr     { padding:16px; grid-template-columns:1fr; gap:5px; }
   .tli-r       { text-align:left; align-items:flex-start; }
   .sk-grp      { grid-template-columns:1fr; gap:8px; }
-  /* project flip cards on mobile */
-  .pc-flip        { height:auto; perspective:none; }
-  .pc-flip-inner  { transform:none !important; display:flex; flex-direction:column; gap:8px; }
-  .pc-face        { position:relative; inset:auto; backface-visibility:visible; }
-  .pc-back        { transform:none; }
-  /* cert flip */
-  .cf          { height:auto; perspective:none; }
-  .cfi         { transform:none !important; }
-  .cfb         { position:relative; transform:none; backface-visibility:visible; display:block; margin-top:8px; }
-  .cff         { position:relative; inset:auto; }
+  /* project flip cards — tap to flip on mobile */
+  .pc-flip { height: 380px; }
+  .pc-flip.tapped .pc-flip-inner { transform: rotateY(180deg); }
+  /* cert flip — tap to flip on mobile */
+  .cf  { height: 250px; }
+  .cf.tapped .cfi { transform: rotateY(180deg); }
   section      { padding-left:20px; padding-right:20px; }
   #radar-wrap  { overflow:auto; }
 }
