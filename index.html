@@ -36,6 +36,7 @@
     <li><a href="#github"         data-sec="github">GitHub</a></li>
     <li><a href="#education"      data-sec="education">Education</a></li>
     <li><a href="#certifications" data-sec="certifications">Certs</a></li>
+    <li><a href="#opento"        data-sec="opento">Open To</a></li>
     <li><a href="#contact"        data-sec="contact">Contact</a></li>
   </ul>
   <button class="nbtn" id="nbtn" aria-label="Menu" style="display:none"><span></span><span></span><span></span></button>
@@ -49,6 +50,7 @@
   <a href="#github"         onclick="closeMenu()">GitHub</a>
   <a href="#education"      onclick="closeMenu()">Education</a>
   <a href="#certifications" onclick="closeMenu()">Certifications</a>
+  <a href="#opento"         onclick="closeMenu()">Open To</a>
   <a href="#contact"        onclick="closeMenu()">Contact</a>
 </div>
 
@@ -152,7 +154,26 @@
         </div></div>
       </div>
 
-      <div class="tli rv" style="transition-delay:.1s">
+      <div class="tli rv" style="transition-delay:.08s">
+        <div class="tli-holo"></div>
+        <div class="tli-hdr" onclick="tlToggle(this)">
+          <div><div class="tli-co">Palmlabs</div><div class="tli-rl">Systems Administrator</div><div class="tli-lc">Riyadh, Saudi Arabia</div></div>
+          <div class="tli-r"><div class="tli-dt">Nov 2024 – Present</div><div class="tli-tg">[ expand ]</div></div>
+        </div>
+        <div class="tli-body"><div class="tli-bi">
+          <div class="pb"><div class="pbn">▸ Cloud Infrastructure &amp; Server Management</div>
+            <ul class="pbul">
+              <li>Administering and maintaining AWS EC2 instances, S3 buckets, and IAM policies for production IoT backend workloads</li>
+              <li>Managing GCP infrastructure for device telemetry ingestion, storage, and analytics pipelines</li>
+              <li>Configuring Linux servers (Ubuntu), setting up reverse proxies, firewalls, and VPNs for secure device-to-cloud communication</li>
+              <li>Monitoring system health, automating deployments via scripts, and maintaining 99%+ uptime for cloud-connected embedded devices</li>
+            </ul>
+            <div class="ttags"><span class="ttag">AWS EC2/S3/IAM</span><span class="ttag">GCP</span><span class="ttag">Linux/Ubuntu</span><span class="ttag">Nginx</span><span class="ttag">VPN</span><span class="ttag">Shell Scripting</span><span class="ttag">System Monitoring</span></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tli rv" style="transition-delay:.24s">
         <div class="tli-holo"></div>
         <div class="tli-hdr" onclick="tlToggle(this)">
           <div><div class="tli-co">Northern Mountains Contracting</div><div class="tli-rl">IT Engineer</div><div class="tli-lc">Riyadh, Saudi Arabia</div></div>
@@ -170,7 +191,7 @@
         </div></div>
       </div>
 
-      <div class="tli rv" style="transition-delay:.2s">
+      <div class="tli rv" style="transition-delay:.32s">
         <div class="tli-holo"></div>
         <div class="tli-hdr" onclick="tlToggle(this)">
           <div><div class="tli-co">Cedrus Group</div><div class="tli-rl">Web Developer (Intern)</div><div class="tli-lc">Abbottabad, Pakistan</div></div>
@@ -453,9 +474,55 @@
 
   <div class="sec-div"><div class="sec-div-pulse" style="animation-delay:1.5s"></div></div>
 
+  <!-- ── OPEN TO ── -->
+  <section id="opento">
+    <div class="sh rv"><span class="sn">08</span><h2 class="st" data-text="Open To">Open To</h2><div class="sl"></div></div>
+    <p class="rv" style="font-family:var(--font-mo);font-size:11px;color:var(--mu);margin-bottom:32px;letter-spacing:.12em">Roles where I'd hit the ground running</p>
+    <div class="roles-g">
+      <div class="role-c rv">
+        <div class="role-ico">⚙️</div>
+        <div class="role-tt">Embedded Systems Engineer</div>
+        <div class="role-ds">Firmware development, bare-metal C/C++, RTOS, peripheral drivers, BLE/LTE/GPS/LoRa integration on STM32, nRF9160, ATSAME70 and more.</div>
+        <div class="ttags"><span class="ttag">C/C++</span><span class="ttag">RTOS</span><span class="ttag">BLE</span><span class="ttag">LTE-M</span><span class="ttag">nRF9160</span></div>
+      </div>
+      <div class="role-c rv" style="transition-delay:.08s">
+        <div class="role-ico">&#x2601;&#xFE0F;</div>
+        <div class="role-tt">Cloud / Systems Administrator</div>
+        <div class="role-ds">Managing AWS EC2/S3, GCP, Linux servers, IAM, VPNs, and cloud-to-device pipelines. Comfortable owning infrastructure for embedded IoT backends.</div>
+        <div class="ttags"><span class="ttag">AWS</span><span class="ttag">GCP</span><span class="ttag">Linux</span><span class="ttag">Nginx</span><span class="ttag">DevOps</span></div>
+      </div>
+      <div class="role-c rv" style="transition-delay:.16s">
+        <div class="role-ico">&#x1F4E1;</div>
+        <div class="role-tt">IoT Solutions Engineer</div>
+        <div class="role-ds">End-to-end IoT product development — from MCU firmware to cloud dashboards. Proven with real-world Car Tracker and Pet Tracker deployments.</div>
+        <div class="ttags"><span class="ttag">IoT</span><span class="ttag">FOTA</span><span class="ttag">GPS</span><span class="ttag">MQTT</span><span class="ttag">AWS</span></div>
+      </div>
+      <div class="role-c rv" style="transition-delay:.24s">
+        <div class="role-ico">&#x1F504;</div>
+        <div class="role-tt">DevOps / Firmware Release Engineer</div>
+        <div class="role-ds">OTA/FOTA pipeline design, firmware CI/CD, versioning, and automated deployment over HTTP/MQTT — bridging embedded dev and cloud ops.</div>
+        <div class="ttags"><span class="ttag">FOTA</span><span class="ttag">OTA</span><span class="ttag">CI/CD</span><span class="ttag">HTTP</span><span class="ttag">Shell</span></div>
+      </div>
+      <div class="role-c rv" style="transition-delay:.32s">
+        <div class="role-ico">&#x1F4F6;</div>
+        <div class="role-tt">RF / Wireless Systems Engineer</div>
+        <div class="role-ds">Deep hands-on experience with BLE GATT, LTE-M, NB-IoT, LoRa, GPS. Protocol design, antenna testing, and field validation under real-world conditions.</div>
+        <div class="ttags"><span class="ttag">BLE</span><span class="ttag">LoRa</span><span class="ttag">LTE-M</span><span class="ttag">NB-IoT</span><span class="ttag">GPS</span></div>
+      </div>
+      <div class="role-c rv" style="transition-delay:.40s">
+        <div class="role-ico">&#x1F3D7;&#xFE0F;</div>
+        <div class="role-tt">Technical Solutions Architect</div>
+        <div class="role-ds">Designing full-stack embedded solutions — hardware selection, firmware architecture, cloud integration, and client-facing technical documentation.</div>
+        <div class="ttags"><span class="ttag">Architecture</span><span class="ttag">Cloud</span><span class="ttag">Embedded</span><span class="ttag">Documentation</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sec-div"><div class="sec-div-pulse" style="animation-delay:1.8s"></div></div>
+
   <!-- ── CONTACT ── -->
   <section id="contact">
-    <div class="sh rv"><span class="sn">08</span><h2 class="st" data-text="Contact">Contact</h2><div class="sl"></div></div>
+    <div class="sh rv"><span class="sn">09</span><h2 class="st" data-text="Contact">Contact</h2><div class="sl"></div></div>
     <div class="co-g">
       <div class="rv">
         <p class="co-intro">Open to <strong>embedded engineering</strong> roles, consulting, and interesting projects. Whether it's firmware, IoT architecture, or cloud integration — let's build something remarkable.</p>
