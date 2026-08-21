@@ -1,0 +1,226 @@
+@use '../styles/tokens' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: $gutter;
+  background: rgba(5, 7, 10, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--cyan);
+}
+.dim {
+  color: var(--text-mute);
+}
+.back {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  &:hover {
+    color: var(--cyan-bright);
+  }
+}
+
+/* hero / heading */
+.hero {
+  padding-top: clamp(3rem, 8vw, 6rem);
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+.headingMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.headingNum {
+  font-family: var(--font-mono);
+  font-size: var(--fs-eyebrow);
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+.title {
+  font-size: var(--fs-h2);
+  line-height: 1.05;
+  max-width: 20ch;
+  margin-bottom: 1.4rem;
+}
+.intro {
+  font-size: var(--fs-lead);
+  color: var(--text-dim);
+  max-width: 62ch;
+  line-height: 1.55;
+  margin-bottom: 2.4rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  em {
+    font-style: normal;
+    font-size: 0.68rem;
+    color: var(--cyan);
+    background: var(--cyan-glow);
+    border-radius: 999px;
+    padding: 0.05rem 0.45rem;
+  }
+  &:hover {
+    color: var(--text);
+    border-color: var(--cyan-dim);
+  }
+  &.active {
+    color: #04110f;
+    background: var(--cyan);
+    border-color: var(--cyan);
+    em {
+      color: var(--cyan);
+      background: rgba(4, 17, 15, 0.35);
+    }
+  }
+}
+
+/* grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.4rem;
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+  &:hover {
+    border-color: var(--cyan-dim);
+    transform: translateY(-3px);
+  }
+}
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.6rem 1.6rem 1.8rem;
+}
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+.index {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--cyan);
+}
+.catTag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 3px;
+  border: 1px solid;
+}
+.catProd {
+  color: #9bea78;
+  border-color: rgba(155, 234, 120, 0.35);
+  background: rgba(155, 234, 120, 0.06);
+}
+.catAcad {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+  background: var(--amber-glow);
+}
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.name {
+  font-size: 1.15rem;
+  line-height: 1.25;
+  margin-bottom: 0.8rem;
+}
+.summary {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin-bottom: 1.2rem;
+  flex: 1;
+}
+.meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  dt {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin-bottom: 0.3rem;
+  }
+  dd {
+    font-size: 0.82rem;
+    color: var(--text);
+  }
+}
+.activeStatus {
+  color: #9bea78;
+}
+.read {
+  display: inline-block;
+  margin-top: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cyan-bright);
+}

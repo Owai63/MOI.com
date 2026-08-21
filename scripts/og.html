@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+  Source for the Open Graph / social share card.
+  Rendered to public/assets/generated/social/portfolio-og.webp by
+  `npm run og` (scripts/render-og.mjs). Edit here, never edit the .webp.
+
+  The card leads with the professional identity rather than the artwork, so a
+  link shared on LinkedIn or WhatsApp is understandable without opening it.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #05070a;
+        color: #eef3f6;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+      .card {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        padding: 72px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        isolation: isolate;
+      }
+      /* The monolith stays, but pushed back so it reads as texture. */
+      .art {
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background: url('../public/assets/generated/hero/monolith-fallback.webp') center right /
+          cover no-repeat;
+        opacity: 0.5;
+      }
+      .veil {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+          linear-gradient(100deg, #05070a 32%, rgba(5, 7, 10, 0.86) 58%, rgba(5, 7, 10, 0.5) 100%),
+          radial-gradient(70% 90% at 0% 100%, rgba(63, 224, 208, 0.13), transparent 70%);
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 22px;
+        letter-spacing: 0.02em;
+      }
+      .mark {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        background: #3fe0d0;
+        box-shadow: 0 0 18px rgba(63, 224, 208, 0.5);
+      }
+      .dim {
+        color: #7d8d95;
+      }
+
+      .name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 500;
+        font-size: 76px;
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+      }
+      .title {
+        margin-top: 18px;
+        font-size: 30px;
+        font-weight: 400;
+        color: #b4c1c8;
+        letter-spacing: -0.01em;
+      }
+      .rule {
+        margin: 30px 0 22px;
+        width: 190px;
+        height: 2px;
+        background: linear-gradient(90deg, #3fe0d0, rgba(63, 224, 208, 0));
+      }
+      .proof {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 19px;
+        font-weight: 500;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: #3fe0d0;
+      }
+
+      .foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 17px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #7d8d95;
+      }
+      .foot .accent {
+        color: #b4c1c8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="art"></div>
+      <div class="veil"></div>
+
+      <div class="top">
+        <span class="mark"></span>MOI<span class="dim">·ENG</span>
+      </div>
+
+      <div>
+        <div class="name">Muhammad Owais Iqbal</div>
+        <div class="title">Embedded Systems &amp; IoT Engineer</div>
+        <div class="rule"></div>
+        <div class="proof">Firmware · Wireless · Device-to-Cloud</div>
+      </div>
+
+      <div class="foot">
+        <span class="accent">Riyadh, Saudi Arabia</span>
+        <span>I build systems that leave the lab.</span>
+      </div>
+    </div>
+  </body>
+</html>

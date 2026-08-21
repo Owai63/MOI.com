@@ -1,0 +1,40 @@
+@use '../../styles/tokens' as *;
+
+.footer {
+  border-top: 1px solid var(--line);
+  padding-block: 2.4rem;
+  background: #04060a;
+}
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  color: var(--text-mute);
+}
+.left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+.mid {
+  color: var(--text-dim);
+}
+.top {
+  color: var(--text-dim);
+  transition: color 0.25s ease;
+  &:hover {
+    color: var(--cyan-bright);
+  }
+}

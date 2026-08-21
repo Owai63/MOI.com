@@ -1,0 +1,39 @@
+// ============================================================================
+// ENGINEERED REALITY — Design tokens
+// Near-black cinematic environment · restrained cyan & amber signals.
+// SCSS breakpoints + shared timing; the runtime palette lives as CSS custom
+// properties in global.scss so CSS Modules can read them via var().
+// ============================================================================
+
+// Breakpoints
+$bp-mobile: 640px;
+$bp-tablet: 900px;
+$bp-desktop: 1200px;
+$bp-wide: 1600px;
+
+// Layout
+$max-content: 1320px;
+$gutter: clamp(1.25rem, 5vw, 5rem);
+
+// Motion
+$ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+$dur-fast: 0.3s;
+$dur-med: 0.6s;
+$dur-slow: 1s;
+
+@mixin up($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}
+@mixin down($bp) {
+  @media (max-width: ($bp - 1px)) {
+    @content;
+  }
+}
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}

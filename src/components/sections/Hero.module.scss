@@ -1,0 +1,263 @@
+@use '../../styles/tokens' as *;
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: stretch;
+  padding-top: var(--header-h);
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    inset-inline: 0;
+    bottom: 0;
+    height: 34%;
+    pointer-events: none;
+    background: url('/assets/generated/textures/floor.webp') center bottom / cover no-repeat;
+    opacity: 0.12;
+    mix-blend-mode: screen;
+    mask-image: linear-gradient(to bottom, transparent, black 42%, transparent 100%);
+  }
+}
+.grid {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: $max-content;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3rem) $gutter clamp(2rem, 5vh, 3.5rem);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: 1.5rem;
+}
+
+/* identity */
+.lead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.eyebrowSub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+/* big statement — sits in front of / around the monolith */
+.statement {
+  align-self: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-display);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  max-width: 15ch;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.5);
+}
+.line {
+  display: block;
+  opacity: 0;
+  transform: translateY(0.4em);
+  animation: rise 1s $ease-out forwards;
+  animation-delay: calc(0.5s + var(--i) * 0.12s);
+}
+.line:last-child {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--text);
+  text-stroke: 1px var(--text);
+}
+/* Arabic letterforms are thin, connected and heavily curved — an outline
+   stroke destroys their legibility, so the final line stays filled in RTL. */
+:global(html[dir='rtl']) .line:last-child {
+  color: var(--text);
+  -webkit-text-stroke: 0;
+  text-stroke: 0;
+}
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@include reduced-motion {
+  .line {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* proof strip — discipline line + three evidence points */
+.proof {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.9rem clamp(1.5rem, 4vw, 3rem);
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+  animation: rise 1s $ease-out 0.95s backwards;
+}
+.proofLine {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  max-width: 46ch;
+  line-height: 1.6;
+}
+.proofPoints {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.6rem;
+  margin-inline-start: auto;
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+}
+.proofTick {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--cyan-dim);
+}
+@include reduced-motion {
+  .proof {
+    animation: none;
+  }
+}
+@include down($bp-tablet) {
+  .proofPoints {
+    margin-inline-start: 0;
+  }
+}
+
+/* footer row */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.footLeft {
+  max-width: 40ch;
+}
+.support {
+  color: var(--text-dim);
+  font-size: var(--fs-lead);
+  line-height: 1.45;
+  margin-bottom: 1.6rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+.footRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.4rem;
+  margin-inline-start: auto;
+}
+.available {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.availDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber-glow);
+}
+.scrollHint {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.scrollLine {
+  width: 52px;
+  height: 1px;
+  background: linear-gradient(to right, var(--cyan), transparent);
+  position: relative;
+  overflow: hidden;
+}
+/* Mirroring the whole rail flips both the fade direction and the travelling
+   highlight, so the hint always moves the way the reader scans. */
+:global(html[dir='rtl']) .scrollLine {
+  transform: scaleX(-1);
+}
+.scrollLine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--cyan);
+  animation: scrollTravel 2s $ease-inout infinite;
+}
+@keyframes scrollTravel {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+@include reduced-motion {
+  .scrollLine::after {
+    animation: none;
+  }
+}
+
+@include down($bp-tablet) {
+  .footRight {
+    align-items: flex-start;
+  }
+  .statement {
+    max-width: 100%;
+  }
+}
+
+@include down($bp-mobile) {
+  /* Uppercase + wide tracking overruns a phone's width on one line. */
+  .available {
+    flex-wrap: wrap;
+    letter-spacing: 0.06em;
+    line-height: 1.5;
+    // Keep clear of the floating chat button.
+    padding-inline-end: 3.5rem;
+  }
+  .scrollHint {
+    padding-inline-end: 3.5rem;
+  }
+}

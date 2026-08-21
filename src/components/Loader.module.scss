@@ -1,0 +1,42 @@
+@use '../styles/tokens' as *;
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: #04060a;
+  display: grid;
+  place-items: center;
+}
+.inner {
+  width: min(420px, 78vw);
+  text-align: center;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 1.1rem;
+}
+.name {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 1.6rem;
+}
+.bar {
+  height: 1px;
+  width: 100%;
+  background: var(--line);
+  overflow: hidden;
+}
+.fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(to right, var(--cyan), var(--amber));
+}

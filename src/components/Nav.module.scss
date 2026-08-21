@@ -1,0 +1,220 @@
+@use '../styles/tokens' as *;
+
+.nav {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  z-index: 100;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-inline: $gutter;
+  transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+.scrolled {
+  // A backdrop-filter re-reads and blurs the pixels behind the bar every
+  // frame while scrolling. 8px still reads as glass over a near-opaque
+  // background and costs noticeably less on integrated GPUs.
+  background: rgba(5, 7, 10, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom-color: var(--line-soft);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  // The wordmark is a Latin identifier — it must never be reordered to
+  // "ENG·MOI" when the document flips to RTL.
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.logoDim {
+  color: var(--text-mute);
+}
+.logoMark {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+
+.links {
+  display: none;
+  margin-inline-start: auto;
+  gap: 2rem;
+  @include up($bp-tablet) {
+    display: flex;
+  }
+  a {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-block: 0.4rem;
+    transition: color 0.25s ease;
+    &:hover {
+      color: var(--text);
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      inset-inline-start: 0;
+      bottom: 0;
+      width: 0;
+      height: 1px;
+      background: var(--cyan);
+      transition: width 0.3s $ease-out;
+    }
+    &:hover::after {
+      width: 100%;
+    }
+  }
+}
+.linkActive {
+  color: var(--text) !important;
+  &::after {
+    width: 100% !important;
+  }
+}
+
+/* action cluster (language toggle + CV) */
+.actions {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  @include up($bp-tablet) {
+    display: inline-flex;
+  }
+}
+.langToggle {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.34rem 0.7rem;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  &:hover {
+    color: var(--text);
+    border-color: var(--cyan-dim);
+    background: var(--surface);
+  }
+}
+.cvBtn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  color: var(--bg);
+  background: var(--cyan);
+  border-radius: 999px;
+  padding: 0.36rem 0.85rem;
+  font-weight: 500;
+  transition: transform 0.2s $ease-out, box-shadow 0.25s ease, opacity 0.2s ease;
+  &:hover {
+    box-shadow: 0 0 18px var(--cyan-glow);
+    transform: translateY(-1px);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* drawer clusters */
+.drawerTop {
+  display: flex;
+  justify-content: center;
+}
+.drawerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.drawerLang {
+  font-size: 0.9rem;
+  padding: 0.55rem 1.4rem;
+  color: var(--text);
+  border-color: var(--cyan-dim);
+}
+.drawerCv {
+  font-size: 0.9rem;
+  padding: 0.55rem 1.4rem;
+}
+
+/* burger */
+.burger {
+  margin-inline-start: auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  @include up($bp-tablet) {
+    display: none;
+  }
+  span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--text);
+    transition: transform 0.3s $ease-out, opacity 0.3s ease;
+  }
+}
+.burgerOpen span:first-child {
+  transform: translateY(3.75px) rotate(45deg);
+}
+.burgerOpen span:last-child {
+  transform: translateY(-3.75px) rotate(-45deg);
+}
+
+/* drawer */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(4, 6, 10, 0.96);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2rem, 6vh, 3.2rem);
+  padding: calc(var(--header-h) + 1.5rem) 1.5rem 3rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.6rem;
+  }
+  a {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    color: var(--text);
+    &:hover {
+      color: var(--cyan-bright);
+    }
+  }
+}
+.drawerOpen {
+  opacity: 1;
+  pointer-events: auto;
+}

@@ -1,0 +1,64 @@
+@use '../../styles/tokens' as *;
+
+/* Bridge between the cinematic hero and the evidence below. Deliberately
+   compact — it is a scannable table, not a section. */
+.strip {
+  position: relative;
+  z-index: 3;
+  padding-block: clamp(2.5rem, 6vh, 4rem);
+  background:
+    linear-gradient(rgba(6, 9, 13, 0.96), rgba(6, 9, 13, 0.96)),
+    url('/assets/generated/textures/brushed-metal.webp');
+  background-size: auto, 720px 720px;
+  border-block: 1px solid var(--line-soft);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--line), transparent);
+  }
+}
+:global(html[dir='rtl']) .head::after {
+  background: linear-gradient(to left, var(--line), transparent);
+}
+
+.rows {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr;
+  @include up($bp-mobile) {
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(2rem, 5vw, 4rem);
+  }
+  @include up($bp-desktop) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-block: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+.focus {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.evidence {
+  color: var(--text-dim);
+  font-size: 0.94rem;
+  line-height: 1.55;
+  max-width: 34ch;
+}

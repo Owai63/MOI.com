@@ -1,121 +1,124 @@
-# MOI.ENG Portfolio v5.0
+# ENGINEERED REALITY — Portfolio v6
 
-> Cyberpunk / embedded-systems aesthetic portfolio — Muhammad Owais Iqbal Malik
+Cinematic, high-end portfolio for **Muhammad Owais Iqbal Malik** — Embedded
+Systems & IoT Engineer. Concept: **"I build systems that leave the lab."**
 
-## File Structure
+Near-black studio environment, restrained cyan/amber signals, large editorial
+typography, and a procedural WebGL monolith that separates and reassembles as
+the transition device through the page.
 
-```
-portfolio/
-├── index.html        ← main HTML (structure & content only)
-├── css/
-│   └── style.css     ← all styles, variables, animations, responsive
-├── js/
-│   └── main.js       ← all interactivity & canvas logic
-└── README.md
-```
+## Stack
 
-## Sections
+React 18 · Vite 5 · TypeScript · React Three Fiber + drei (Three.js) · GSAP
+ScrollTrigger · Lenis · Framer Motion (light UI only) · React Router · SCSS
+Modules + a CSS-custom-property design system.
 
-| # | Section | Description |
-|---|---------|-------------|
-| 01 | Experience | 4-entry animated timeline |
-| 02 | Skills | Pill grid + radar chart (7 axes) |
-| 03 | Projects | Dossier console — filterable index + viewport (11 projects) |
-| 04 | GitHub | Live repo grid via GitHub API |
-| 05 | Education | Degree + CGPA card |
-| 06 | Awards | Gold & Silver medal cards |
-| 07 | Certifications | Flip-card carousel (5 certs) |
-| 08 | Open To | Role cards — positions open to |
-| 09 | Contact | Email, phone, LinkedIn, location |
+## Commands
 
+```bash
+npm install        # install dependencies
+npm run dev        # development server (http://localhost:5173)
+npm run build      # production build → dist/   (runs tsc then vite build)
+npm run preview    # preview the production build
+npm run typecheck  # tsc -b --noEmit
 
-## Projects
-
-Projects live as data objects in the `DOSSIERS` array in `js/main.js` and render into a filterable dossier console (All / Production / Academic). To add a project, append an object with `id`, `icon`, `cat`, `org`, `title`, `status`, `statusLabel`, `context`, `stack`, `bullets[]`, `tags[]`, and optional `note` / `badge`.
-
-| Project | Category | Org / Context |
-|---------|----------|---------------|
-| Car Tracker — LTE/BLE/GPS IoT Device | Production | Palmlabs |
-| Production Database & Tracker Device Management | Production | Palmlabs |
-| Shooting Range Target Control System — XBee & LoRa | Production | Palmlabs |
-| Pet Tracker — NB-IoT/LTE-M Asset Tracker | Production | Palmlabs |
-| Cedrus Group — Corporate Website | Production | Cedrus Group Internship |
-| CareConnect — Hospital Website | Production | Freelance Project |
-| Brain-Controlled Wheelchair | Academic | Final Year Project (Gold Medal) |
-| Hand Gesture Controlled Car | Academic | Embedded Systems |
-| FSM 4-Lane Traffic Light Controller | Academic | Digital Design |
-| Bank Management System | Academic | C++ / OOP |
-| Online Food Ordering System | Academic | Full-Stack Web |
-
-## Experience Entries
-
-| Company | Role | Period |
-|---------|------|--------|
-| Palmlabs | Embedded Engineer | Nov 2024 – Present |
-| Palmlabs | Systems Administrator | Nov 2024 – Present |
-| Northern Mountains Contracting | IT Engineer | Aug 2024 – Nov 2025 |
-| Cedrus Group | Web Developer (Intern) | Jun 2023 – Sep 2023 |
-
-## Features
-
-| Feature | File |
-|---|---|
-| Boot terminal sequence | `js/main.js` |
-| Custom crosshair cursor | `css/style.css` + `js/main.js` |
-| Mouse trail particles | `js/main.js` |
-| Click burst + ripple | `js/main.js` |
-| Circuit-board canvas background | `js/main.js` |
-| Floating hero particles | `js/main.js` |
-| Parallax blobs (mouse-driven) | `js/main.js` |
-| 3-D orbital hero visual | `css/style.css` |
-| Animated hero stat counters | `js/main.js` |
-| Typewriter role subtitle (8 roles) | `js/main.js` |
-| Text scramble section headings | `js/main.js` |
-| Skill pill stagger entrance | `js/main.js` |
-| Skill radar chart — 7 axes (canvas) | `js/main.js` |
-| Timeline scan beam | `css/style.css` |
-| 4-colour timeline dot progression | `css/style.css` |
-| Project dossier console (filterable index + viewport) | `js/main.js` |
-| Project category filters (All / Production / Academic) | `js/main.js` |
-| Flip certification cards | `css/style.css` |
-| Certification carousel with dots | `js/main.js` |
-| Mobile tap-to-flip cards | `js/main.js` |
-| Live GitHub repository grid | `js/main.js` |
-| GitHub repo filter (All / Original / Forks / Starred) | `js/main.js` |
-| Active nav highlight on scroll | `js/main.js` |
-| Scroll progress bar | `js/main.js` |
-| Magnetic CTA buttons | `js/main.js` |
-| Audio visualiser bars (awards) | `js/main.js` |
-| Open To — role cards section | `css/style.css` |
-| Konami code easter egg ↑↑↓↓←→←→BA | `js/main.js` |
-
-## Customisation
-
-All colour variables are at the top of `css/style.css`:
-
-```css
-:root {
-  --a:   #00ffe0;   /* primary cyan  */
-  --a2:  #ff3e6c;   /* accent pink   */
-  --gr:  #00ff88;   /* green         */
-  --pur: #bd7fff;   /* purple        */
-}
+npm run translate        # fill any missing English→Arabic strings (needs GEMINI_API_KEY)
+npm run translate:check   # CI gate: exit 1 if any English string has no translation
+npm run server            # Node/Express server: serves dist/ + the /api/chat proxy
 ```
 
-Timeline dot colours follow the same palette — cyan → pink → green → purple — one per entry. To add a 5th entry, append to `style.css`:
+**Development:** `npm run dev` · **Production build:** `npm run build`
 
-```css
-.tli:nth-child(6)::before { background:var(--or); box-shadow:0 0 18px var(--or); }
-.tli:nth-child(6) .tli-co { color:var(--or); }
+## Structure
+
+```
+index.html                 Vite entry (meta, OG, fonts)
+src/
+  main.tsx  App.tsx         bootstrap + router (lazy case studies)
+  data/content.ts           SINGLE SOURCE OF TRUTH — all copy/facts, no invented claims
+  styles/                   tokens + global design system
+  lib/                      quality tiering, media queries, reveal, Lenis, scroll choreography
+  three/                    monolith scene (Canvas, Monolith, studio rig, floor) + static fallback + stage selector
+  components/
+    Nav, Loader, RouteFallback
+    ui/                     Reveal, SectionHeading, Cta (magnetic), TagList
+    sections/               Hero, Work, FeaturedStory, Capabilities, Experience,
+                            Recognition, Credentials, Philosophy, Opportunities,
+                            Contact, Footer, Interlude
+    visuals/ProjectVisual   code-rendered SVG world per project
+  routes/                   Home, CaseStudy, NotFound
+public/assets/generated/    conceptual art output (see docs below)
+_backup_original_v5/        backup of the previous site
 ```
 
+## Homepage order
 
-## Responsive
+Loader → Hero → **Selected Systems** (Work) → Featured Story → **Capabilities**
+→ **Experience** → Recognition & Education (**About**) → Credentials →
+Philosophy → Opportunities → **Contact** → Footer.
+Nav: Work · Capabilities · Experience · About · Contact.
 
-- ≥ 1024 px — full two-column layout with orbital visual
-- 768 – 1023 px — single column, hamburger menu
-- < 768 px — mobile optimised, flip-cards shown flat, tap-to-flip enabled
+## Case studies
 
-## Easter Egg
+`/work/mymo2` · `/work/shooting-range` · `/work/device-management` ·
+`/work/lifecycle-database` · `/work/violence-detection` (+ `/work/wheelchair`).
 
-Type the **Konami code** on any page: `↑ ↑ ↓ ↓ ← → ← → B A`
+## Bilingual (English ⇄ Arabic)
+
+English is the only side that is authored. Arabic is generated **once, at build
+time**, into a flat map (`src/i18n/ar.json`) that ships inside the bundle — the
+browser never translates anything at runtime, so there is no per-visitor cost
+and no half-translated first frame.
+
+```bash
+npm run translate         # translates only what's new; existing strings are never re-sent
+npm run translate:check   # fails if any English string is missing an Arabic counterpart
+```
+
+`src/i18n/surface.ts` defines "every English word on the site" (content, ui,
+copy, image alt text). **Never hardcode visible English in a component** — it
+would bypass the surface and stay English forever. Hand-approved wording lives
+in `src/i18n/curated.ar.ts` and always wins over machine output.
+
+See [`BILINGUAL_CHATBOT_SETUP.md`](./BILINGUAL_CHATBOT_SETUP.md) for the full guide.
+
+## Deployment
+
+The same codebase deploys to two places. `VITE_BASE` is the only difference —
+it is why every `public/` path in TypeScript goes through `src/lib/asset.ts`
+rather than a hardcoded leading slash.
+
+| Target | Build | Serves | Chat assistant |
+|---|---|---|---|
+| **GitHub Pages** — [owai63.github.io/MyPortfolio](https://owai63.github.io/MyPortfolio/) | `VITE_BASE=/MyPortfolio/ npm run build` | static `dist/` | ✗ (static host, no backend) |
+| **Node server** (droplet) | `npm run build` | `npm run server` → `dist/` + `/api/chat` | ✓ |
+
+Pages deploys automatically from `main` via `.github/workflows/static.yml`.
+The build needs no secrets, because translations are pre-generated and committed.
+`GEMINI_API_KEY` is only required by the Node server, for the chat assistant.
+
+## Content integrity
+
+Core portfolio content comes from the previous site (`_backup_original_v5/`). The violence-detection case study is based on the owner's later technical report and genuine held-out RTX 4050 results. **No unsupported metric, technology, client, or product claim was invented.** Read **[`CONTENT_AUDIT.md`](./CONTENT_AUDIT.md)** before publishing; it records the remaining naming, credential, and date checks.
+
+## Companion docs
+
+- [`CONTENT_AUDIT.md`](./CONTENT_AUDIT.md) — discrepancies, unverified claims, privacy, moved content.
+- [`ASSET_REQUIREMENTS.md`](./ASSET_REQUIREMENTS.md) — real photos/screenshots/diagrams/models to supply.
+- [`IMAGE_GENERATION_PROMPTS.md`](./IMAGE_GENERATION_PROMPTS.md) — final prompts + dimensions.
+- [`IMAGE_GENERATION_LOG.md`](./IMAGE_GENERATION_LOG.md) — generation records + the Higgsfield substitution note.
+- [`PERFORMANCE_NOTES.md`](./PERFORMANCE_NOTES.md) — bundle, adaptive quality, render-loop hygiene.
+
+## Accessibility & performance highlights
+
+Semantic landmarks, logical headings, keyboard nav + visible focus, skip link,
+`prefers-reduced-motion` throughout, complete no-WebGL/static fallback, code-split
+3D, adaptive DPR/quality, off-screen render pause, no allocation in the render
+loop, GSAP/ScrollTrigger cleanup, no layout shift. Details in
+`PERFORMANCE_NOTES.md`.
+
+## Secrets
+
+No tokens are committed. `.env*`, `*.token`, and provider token files are
+git-ignored. Do not paste any Hugging Face / Higgsfield token into source —
+keep it in an ignored `.env` only.

@@ -1,0 +1,110 @@
+@use '../../styles/tokens' as *;
+
+.section {
+  border-top: 1px solid var(--line-soft);
+  padding-bottom: clamp(4rem, 10vh, 7rem);
+}
+.line {
+  font-size: clamp(2rem, 6vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  max-width: 20ch;
+  margin-top: 1.4rem;
+  margin-bottom: clamp(3rem, 8vw, 5rem);
+}
+
+.grid {
+  display: grid;
+  gap: 2.5rem 4rem;
+  grid-template-columns: 1fr;
+  @include up($bp-tablet) {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+
+.emailRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.email {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3.4vw, 2rem);
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
+  transition: color 0.25s ease, border-color 0.25s ease;
+  &:hover {
+    color: var(--cyan-bright);
+    border-color: var(--cyan-dim);
+  }
+}
+.copy {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+  &:hover {
+    border-color: var(--cyan-dim);
+    color: var(--cyan-bright);
+  }
+}
+.avail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: var(--text-mute);
+}
+.availDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber-glow);
+}
+
+.links {
+  list-style: none;
+  display: grid;
+  gap: 0;
+  align-self: start;
+  li a {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--line);
+    transition: padding-inline-start 0.25s ease, color 0.25s ease;
+    &:hover {
+      padding-inline-start: 0.6rem;
+      color: var(--cyan-bright);
+    }
+  }
+  li:last-child a {
+    border-bottom: 1px solid var(--line);
+  }
+}
+.k {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.v {
+  font-size: 0.95rem;
+  color: var(--text);
+  .links a:hover & {
+    color: var(--cyan-bright);
+  }
+}

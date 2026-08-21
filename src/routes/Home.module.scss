@@ -1,0 +1,16 @@
+@use '../styles/tokens' as *;
+
+/* Content surface sits above the fixed monolith. Near-opaque for crisp text,
+   with a faint sense of the object behind. Cheap (no backdrop blur). */
+.surface {
+  position: relative;
+  z-index: 3;
+  background:
+    linear-gradient(rgba(5, 7, 10, 0.965), rgba(5, 7, 10, 0.965)),
+    url('/assets/generated/textures/brushed-metal.webp');
+  background-size: auto, 720px 720px;
+  box-shadow: 0 -40px 80px -40px rgba(0, 0, 0, 0.9);
+}
+.surface + .surface {
+  box-shadow: none;
+}
