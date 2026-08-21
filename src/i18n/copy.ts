@@ -23,10 +23,7 @@ export interface Copy {
     catProduction: string;
     catAcademic: string;
     read: string;
-    tagActive: string;
     tagConcept: string;
-    tagNeeds: string;
-    tagLive: string;
     viewAll: string;
   };
   allProjects: {
@@ -111,12 +108,7 @@ export const copyEn: Copy = {
     catProduction: 'Production system',
     catAcademic: 'Academic project',
     read: 'View case study',
-    tagActive: 'Freelance · developing actively',
     tagConcept: 'Conceptual visualization',
-    tagNeeds: 'Conceptual · content required',
-    // Shown under the live 3D window: the model is built to the real hardware,
-    // but it is a reconstruction, not a photograph.
-    tagLive: 'Live 3D model · reconstruction',
     viewAll: 'View all projects',
   },
   allProjects: {

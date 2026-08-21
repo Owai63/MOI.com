@@ -6,8 +6,13 @@
 #
 # No secrets are needed: English→Arabic translation is generated ahead of time
 # by `npm run translate` and committed as src/i18n/ar.json, so the build is
-# fully offline. The Gemini chat assistant is the one feature that needs a
-# server and therefore does not function on Pages.
+# fully offline.
+#
+# The Gemini chat assistant is the one feature that cannot run on Pages, since
+# it needs a server process to hold the API key. Pages therefore serves the
+# site and calls the assistant on the droplet, which runs the same Express
+# proxy over HTTPS. The droplet only accepts this origin (ALLOWED_ORIGIN), and
+# the key never reaches the browser.
 name: Deploy site to Pages
 
 on:
@@ -44,9 +49,15 @@ jobs:
         run: npm run translate:check
 
       - name: Build
-        # Pages serves this repo from /MyPortfolio/, not the domain root.
         env:
+          # Pages serves this repo from /MyPortfolio/, not the domain root.
           VITE_BASE: /MyPortfolio/
+          # Pages is static, so the chat API lives on the droplet. It must be
+          # https:// — a secure page is not allowed to call a plain-http API,
+          # and the browser blocks it as mixed content. The hostname resolves
+          # to the droplet via sslip.io wildcard DNS, which is what makes a
+          # real certificate possible without owning a domain.
+          VITE_CHAT_ENDPOINT: https://167-172-91-78.sslip.io/api/chat
         run: npm run build
 
       - name: Add SPA fallback

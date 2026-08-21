@@ -177,66 +177,13 @@
   }
 }
 
-/* visual column — a window, not a picture ---------------------------------
-   The bench renders on a fixed canvas behind the page. This element draws no
-   background at all: it reserves the space, marks the corners, and lets the
-   device that assembles on the bench show through. Only the framing is CSS. */
+/* visual column — a seamless hole, no frame ------------------------------
+   The bench renders on a fixed canvas behind the page. This element draws
+   nothing at all: it only reserves the space the device occupies, so the
+   object appears to sit in the page rather than inside a box. */
 .deviceWindow {
   position: relative;
   aspect-ratio: 3 / 2;
-  border-radius: 10px;
-  /* a barely-there inner edge so the frame reads without boxing the object in */
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-.corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 1px solid var(--cyan-dim);
-  opacity: 0.55;
-  &[data-c='tl'] {
-    top: -1px;
-    inset-inline-start: -1px;
-    border-width: 1px 0 0 1px;
-  }
-  &[data-c='tr'] {
-    top: -1px;
-    inset-inline-end: -1px;
-    border-width: 1px 1px 0 0;
-  }
-  &[data-c='bl'] {
-    bottom: -1px;
-    inset-inline-start: -1px;
-    border-width: 0 0 1px 1px;
-  }
-  &[data-c='br'] {
-    bottom: -1px;
-    inset-inline-end: -1px;
-    border-width: 0 1px 1px 0;
-  }
-}
-.accent-cyan .corner {
-  border-color: var(--cyan-dim);
-}
-.accent-amber .corner {
-  border-color: rgba(246, 162, 80, 0.55);
-}
-.accent-dual .corner {
-  border-color: var(--cyan-dim);
-}
-.visualTag {
-  position: absolute;
-  bottom: 0.8rem;
-  inset-inline-end: 0.9rem;
-  z-index: 2;
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-mute);
-  background: rgba(4, 6, 10, 0.7);
-  padding: 0.3rem 0.55rem;
-  border-radius: 3px;
 }
 
 .activeStatus {

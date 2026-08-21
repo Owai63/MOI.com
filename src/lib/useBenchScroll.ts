@@ -32,6 +32,10 @@ interface Band {
   /** document-space bounds of one work chapter. */
   top: number;
   bottom: number;
+  /** document-space centre of that chapter's scene window (the hole the
+   *  device shows through). Measured once per refresh so the per-frame path
+   *  never touches layout. */
+  windowY: number;
 }
 
 /** Fraction trimmed off each end of a chapter to make room for the swap. */
@@ -68,19 +72,57 @@ export function useBenchScroll(enabled: boolean) {
         document.querySelectorAll<HTMLElement>('#work [data-layer]'),
       );
       const pageY = window.scrollY;
-      /* The hold band is the middle of each chapter, not the whole of it.
-         Consecutive chapters are separated by only ~90px of margin, and using
-         the literal gap as the transition window meant a device had to fold
-         away and the next one assemble inside a fifth of a screen of
-         scrolling — far too fast to read as anything but a pop. Insetting the
-         hold gives the swap most of a viewport to happen in, while the camera
-         still sits square on a chapter for the whole time its text is the
-         thing being read. */
-      bands = articles.map((el) => {
+      const narrow = window.innerWidth < 900;
+
+      const raw = articles.map((el) => {
         const r = el.getBoundingClientRect();
-        const inset = r.height * HOLD_INSET;
-        return { top: r.top + pageY + inset, bottom: r.bottom + pageY - inset };
+        const hole = el.querySelector<HTMLElement>('[data-scene-window]');
+        const hr = hole?.getBoundingClientRect();
+        return {
+          top: r.top + pageY,
+          bottom: r.bottom + pageY,
+          windowY: hr ? hr.top + pageY + hr.height / 2 : r.top + pageY + r.height / 2,
+        };
       });
+
+      if (!narrow) {
+        /* Two-column layout. The hold band is the middle of each chapter, not
+           the whole of it. Consecutive chapters are separated by only ~90px of
+           margin, and using the literal gap as the transition window meant a
+           device had to fold away and the next one assemble inside a fifth of
+           a screen of scrolling — far too fast to read as anything but a pop.
+           Insetting the hold gives the swap most of a viewport to happen in,
+           while the camera still sits square on a chapter for the whole time
+           its text is the thing being read. */
+        bands = raw.map((r) => {
+          const inset = (r.bottom - r.top) * HOLD_INSET;
+          return { top: r.top + inset, bottom: r.bottom - inset, windowY: r.windowY };
+        });
+      } else {
+        /* Stacked layout. Banding by the article box is wrong here: the visual
+           slot sits at the BOTTOM of a very tall stacked chapter, so by the
+           time the reader has that slot on screen the article's centre is far
+           above the viewport — which put the scene in the swap gap, where
+           `build` dips to zero and the device is folded away. That is why most
+           projects showed nothing on a phone.
+
+           So band by the slot itself. Each chapter owns the scroll from
+           halfway-back to halfway-forward between neighbouring slots, inset
+           the same way to leave room for the swap. Now the device is fully
+           assembled exactly while its slot is the thing on screen. */
+        const spacing =
+          raw.length > 1
+            ? (raw[raw.length - 1].windowY - raw[0].windowY) / (raw.length - 1)
+            : window.innerHeight;
+        bands = raw.map((r, i) => {
+          const prev = i > 0 ? raw[i - 1].windowY : r.windowY - spacing;
+          const next = i < raw.length - 1 ? raw[i + 1].windowY : r.windowY + spacing;
+          const segTop = (prev + r.windowY) / 2;
+          const segBottom = (r.windowY + next) / 2;
+          const inset = (segBottom - segTop) * HOLD_INSET;
+          return { top: segTop + inset, bottom: segBottom - inset, windowY: r.windowY };
+        });
+      }
 
       const hero = document.getElementById('top');
       heroCenter = hero
@@ -162,8 +204,24 @@ export function useBenchScroll(enabled: boolean) {
          under the text, so the frame stays centred. */
       const narrow = window.innerWidth < 900;
       sceneState.frameBias = narrow ? 0 : index % 2 === 0 ? 1 : -1;
-      // stacked layout: the visual column sits under the copy, not beside it
-      sceneState.frameBiasY = narrow ? 1 : 0;
+      /* Stacked layout: the visual sits under the copy rather than beside it,
+         so the device has to be placed vertically instead of sideways. A
+         fixed bias cannot work here — chapters are different heights, so the
+         hole is at a different height in the viewport for each one, which is
+         why some projects showed nothing at all. Instead aim at where the
+         chapter's hole actually is right now.
+
+         biasY = 1 puts the subject about three-quarters down the viewport,
+         i.e. 0.25 of a viewport below centre, so the offset-to-bias factor is
+         1 / 0.25 = 4. Clamped, because a tall chapter can push its hole below
+         the fold and the device must stay on screen rather than track it out
+         of sight. */
+      sceneState.frameBiasY = narrow
+        ? Math.max(
+            -1.1,
+            Math.min(1.3, ((bands[index].windowY - window.scrollY) / window.innerHeight - 0.5) * 4),
+          )
+        : 0;
       sceneState.build = build;
       // power lags the build: the device is assembled before it lights up
       sceneState.power = smooth((build - 0.62) / 0.38);

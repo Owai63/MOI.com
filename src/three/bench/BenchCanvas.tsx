@@ -455,7 +455,7 @@ export function BenchCanvas({
         frameloop={visible ? 'always' : 'never'}
         dpr={profile.dpr}
         shadows={q === 'high'}
-        gl={{ antialias: q !== 'low', alpha: false, powerPreference: 'high-performance' }}
+        gl={{ antialias: profile.antialias, alpha: false, powerPreference: 'high-performance' }}
         /* far has to clear the range lane: ~13m of standoff at the wide shot,
            plus the portrait pull-back, plus the depth of the set behind it. */
         camera={{ position: [0.92, 0.46, 1.62], fov: 32, near: 0.02, far: 48 }}

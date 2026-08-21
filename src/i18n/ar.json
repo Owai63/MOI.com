@@ -316,7 +316,6 @@
   "Link": "الرابط",
   "Linux / Ubuntu": "Linux / Ubuntu",
   "Linux / Ubuntu hardening": "تحصين Linux / Ubuntu",
-  "Live 3D model · reconstruction": "نموذج ثلاثي الأبعاد مباشر · إعادة بناء",
   "Live reset support for the temporal buffer and alert state.": "دعم إعادة الضبط المباشر لذاكرة التخزين المؤقت الزمني وحالة التنبيه.",
   "Loaded multiple session CSVs into DataFrames and concatenated them with a reset index for a single consistent dataset.": "تم تحميل ملفات CSV متعددة للجلسات في DataFrames ودمجها مع إعادة تعيين الفهرس للحصول على مجموعة بيانات واحدة ومتسقة.",
   "Loading…": "جاري التحميل...",

@@ -8,6 +8,8 @@ export interface DeviceProfile {
   webgl: boolean;
   dpr: [number, number];
   postprocessing: boolean;
+  /** MSAA. Off on touch devices — see getDeviceProfile. */
+  antialias: boolean;
 }
 
 let cached: DeviceProfile | null = null;
@@ -43,11 +45,17 @@ export function getDeviceProfile(): DeviceProfile {
     tier = 'medium';
   }
 
+  /* Touch devices pay for the scene twice: the bench is a full-viewport fixed
+     canvas, so every frame is both rendered and then composited underneath
+     scrolling page content. Capping resolution and dropping MSAA there is the
+     difference between a smooth scroll and a stuttering one, and at phone
+     pixel densities neither is visible — the edges are already sub-pixel. */
   cached = {
     tier,
     webgl,
-    dpr: tier === 'high' ? [1, 2] : tier === 'medium' ? [1, 1.5] : [1, 1],
+    dpr: tier === 'low' ? [1, 1] : coarse ? [1, 1.25] : tier === 'high' ? [1, 2] : [1, 1.5],
     postprocessing: tier === 'high',
+    antialias: tier !== 'low' && !coarse,
   };
   return cached;
 }
