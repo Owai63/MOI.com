@@ -28,7 +28,7 @@ export function Hero() {
       className={styles.hero}
       ref={ref}
       aria-label={ui.heroLandmark}
-      data-monolith-window
+      data-scene-window
     >
       <div className={styles.grid}>
         <div className={styles.lead}>

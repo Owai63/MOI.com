@@ -13,7 +13,7 @@ export function Interlude({
   align?: 'left' | 'right';
 }) {
   return (
-    <div className={styles.interlude} id={id} aria-hidden="true" data-monolith-window>
+    <div className={styles.interlude} id={id} aria-hidden="true" data-scene-window>
       <div className={`container ${styles.inner} ${align === 'right' ? styles.right : ''}`}>
         <span className={styles.label}>{label}</span>
       </div>

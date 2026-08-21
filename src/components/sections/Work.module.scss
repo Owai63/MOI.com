@@ -45,7 +45,33 @@
   }
 }
 
-/* text column */
+/* text column ------------------------------------------------------------
+   This copy now sits over a moving 3D scene rather than over a flat panel, so
+   it carries its own backdrop. A soft directional wash (rather than a hard
+   card) keeps the chapter feeling like part of the room while holding the text
+   comfortably above the contrast floor. */
+.text {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(1.5rem, 3vw, 2.4rem);
+  border-radius: 12px;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4rem -5rem;
+    z-index: -1;
+    /* Centred rather than weighted to one side: odd chapters put this column
+       on the right, and a left-anchored wash leaves that copy sitting on bare
+       scene. */
+    background: radial-gradient(
+      62% 60% at 50% 48%,
+      rgba(5, 7, 10, 0.95),
+      rgba(5, 7, 10, 0.82) 46%,
+      transparent 100%
+    );
+  }
+}
+
 .top {
   display: flex;
   align-items: baseline;
@@ -151,26 +177,52 @@
   }
 }
 
-/* visual column */
-.visualFrame {
+/* visual column — a window, not a picture ---------------------------------
+   The bench renders on a fixed canvas behind the page. This element draws no
+   background at all: it reserves the space, marks the corners, and lets the
+   device that assembles on the bench show through. Only the framing is CSS. */
+.deviceWindow {
   position: relative;
   aspect-ratio: 3 / 2;
-  border: 1px solid var(--line);
   border-radius: 10px;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
-    #06090d;
-  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.8);
+  /* a barely-there inner edge so the frame reads without boxing the object in */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
-.accent-cyan {
-  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(63, 224, 208, 0.05);
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--cyan-dim);
+  opacity: 0.55;
+  &[data-c='tl'] {
+    top: -1px;
+    inset-inline-start: -1px;
+    border-width: 1px 0 0 1px;
+  }
+  &[data-c='tr'] {
+    top: -1px;
+    inset-inline-end: -1px;
+    border-width: 1px 1px 0 0;
+  }
+  &[data-c='bl'] {
+    bottom: -1px;
+    inset-inline-start: -1px;
+    border-width: 0 0 1px 1px;
+  }
+  &[data-c='br'] {
+    bottom: -1px;
+    inset-inline-end: -1px;
+    border-width: 0 1px 1px 0;
+  }
 }
-.accent-amber {
-  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(246, 162, 80, 0.05);
+.accent-cyan .corner {
+  border-color: var(--cyan-dim);
 }
-.accent-dual {
-  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(63, 224, 208, 0.04);
+.accent-amber .corner {
+  border-color: rgba(246, 162, 80, 0.55);
+}
+.accent-dual .corner {
+  border-color: var(--cyan-dim);
 }
 .visualTag {
   position: absolute;

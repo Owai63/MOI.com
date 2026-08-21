@@ -3,7 +3,6 @@ import { useContent, useCopy, useUi, useFormat } from '../../i18n/useContent';
 import { SectionHeading } from '../ui/SectionHeading';
 import { Reveal } from '../ui/Reveal';
 import { TagList } from '../ui/TagList';
-import { ProjectVisual } from '../visuals/ProjectVisual';
 import styles from './Work.module.scss';
 
 export function Work() {
@@ -93,15 +92,29 @@ export function Work() {
                   </Link>
                 </Reveal>
 
+                {/* The visual column is a hole in the page, not a picture.
+                    The workbench renders on a fixed canvas behind all content;
+                    this frame is transparent, so the device that assembles
+                    itself on the bench shows through exactly here. The camera
+                    is biased toward this side of the viewport per chapter (see
+                    useBenchScroll), which is what lands the object inside the
+                    frame instead of merely near it. */}
                 <Reveal className={styles.visual} delay={120}>
-                  <div className={`${styles.visualFrame} ${styles[`accent-${p!.accent}`]}`}>
-                    <ProjectVisual slug={p!.slug} />
+                  <div
+                    className={`${styles.deviceWindow} ${styles[`accent-${p!.accent}`]}`}
+                    data-scene-window
+                    aria-hidden="true"
+                  >
+                    <span className={styles.corner} data-c="tl" />
+                    <span className={styles.corner} data-c="tr" />
+                    <span className={styles.corner} data-c="bl" />
+                    <span className={styles.corner} data-c="br" />
                     <span className={styles.visualTag}>
                       {isActive(p!.slug)
                         ? copy.work.tagActive
                         : p!.needsSourceContent
                           ? copy.work.tagNeeds
-                          : copy.work.tagConcept}
+                          : copy.work.tagLive}
                     </span>
                   </div>
                 </Reveal>

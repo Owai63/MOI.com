@@ -4,8 +4,13 @@ Cinematic, high-end portfolio for **Muhammad Owais Iqbal Malik** — Embedded
 Systems & IoT Engineer. Concept: **"I build systems that leave the lab."**
 
 Near-black studio environment, restrained cyan/amber signals, large editorial
-typography, and a procedural WebGL monolith that separates and reassembles as
-the transition device through the page.
+typography, and a **procedural WebGL workbench** — a dark electronics bench
+carrying the instruments, screens and hardware the work was actually built on.
+
+The bench is one continuous room the page moves the camera through, and each
+work chapter is staged where that project actually happened — on the mat, on a
+screen, or out on the floor behind the bench. Opening a case study lifts the
+device onto an inspection stage and takes it apart as you scroll.
 
 ## Stack
 
@@ -21,6 +26,10 @@ npm run dev        # development server (http://localhost:5173)
 npm run build      # production build → dist/   (runs tsc then vite build)
 npm run preview    # preview the production build
 npm run typecheck  # tsc -b --noEmit
+
+npm run fallback   # re-render the static hero still from the live scene (dev server must be running)
+npm run og         # re-render the Open Graph share image
+npm run photos     # OPT-IN: downscale pics/ into public/assets/photos/ — see "Reference photographs"
 
 npm run translate        # fill any missing English→Arabic strings (needs GEMINI_API_KEY)
 npm run translate:check   # CI gate: exit 1 if any English string has no translation
@@ -38,7 +47,23 @@ src/
   data/content.ts           SINGLE SOURCE OF TRUTH — all copy/facts, no invented claims
   styles/                   tokens + global design system
   lib/                      quality tiering, media queries, reveal, Lenis, scroll choreography
-  three/                    monolith scene (Canvas, Monolith, studio rig, floor) + static fallback + stage selector
+  three/
+    BenchStage.tsx          capability gate: live scene, or the static still
+    SceneFallback.tsx       still image for no-WebGL / low-tier / reduced-motion
+    sceneState.ts           mutable state shared between scroll and the render loop
+    bench/
+      BenchCanvas.tsx       renderer, lighting rigs, camera rig, post-processing
+      Workbench.tsx         scene graph; bench mode and inspect mode
+      layout.ts             where every prop stands + derived screen poses
+      cameraPath.ts         the camera stations the page is choreographed against
+      assembly.ts           one displacement model for both assemble and explode
+      textures.ts           every surface map, drawn on a 2D canvas at startup
+      materials.ts          shared bench materials + per-device material sets
+      parts/                PCB, populated components, wires, LEDs, radio, shells
+      props/                desk, chair, light, dressing, monitors, laptop,
+                            instruments, and the room behind the bench
+      screens/              the console programs the bench screens run
+      devices/              one model per chapter + the registry that stages them
   components/
     Nav, Loader, RouteFallback
     ui/                     Reveal, SectionHeading, Cta (magnetic), TagList
@@ -47,7 +72,8 @@ src/
                             Contact, Footer, Interlude
     visuals/ProjectVisual   code-rendered SVG world per project
   routes/                   Home, CaseStudy, NotFound
-public/assets/generated/    conceptual art output (see docs below)
+public/assets/generated/    conceptual art + the rendered hero still
+public/assets/photos/       reference photographs (absent by default — see below)
 _backup_original_v5/        backup of the previous site
 ```
 
@@ -104,9 +130,6 @@ Core portfolio content comes from the previous site (`_backup_original_v5/`). Th
 ## Companion docs
 
 - [`CONTENT_AUDIT.md`](./CONTENT_AUDIT.md) — discrepancies, unverified claims, privacy, moved content.
-- [`ASSET_REQUIREMENTS.md`](./ASSET_REQUIREMENTS.md) — real photos/screenshots/diagrams/models to supply.
-- [`IMAGE_GENERATION_PROMPTS.md`](./IMAGE_GENERATION_PROMPTS.md) — final prompts + dimensions.
-- [`IMAGE_GENERATION_LOG.md`](./IMAGE_GENERATION_LOG.md) — generation records + the Higgsfield substitution note.
 - [`PERFORMANCE_NOTES.md`](./PERFORMANCE_NOTES.md) — bundle, adaptive quality, render-loop hygiene.
 
 ## Accessibility & performance highlights
@@ -122,3 +145,72 @@ loop, GSAP/ScrollTrigger cleanup, no layout shift. Details in
 No tokens are committed. `.env*`, `*.token`, and provider token files are
 git-ignored. Do not paste any Hugging Face / Higgsfield token into source —
 keep it in an ignored `.env` only.
+
+## The workbench scene
+
+Everything in the scene is generated in code — there are no model files and no
+texture downloads. Solder mask, copper routing, silkscreen designators, the
+printed rating label, wood grain and the cutting mat are all rasterised onto a
+2D canvas once at startup; the geometry is assembled from primitives. That is
+a few tens of kilobytes of JavaScript instead of several megabytes of GLB and
+PNG, it stays sharp at any zoom, and — because every part is a named object
+rather than a baked mesh — the exploded views come free.
+
+### How each chapter is staged
+
+`three/bench/devices/registry.tsx` is the single place that decides this. Every
+chapter declares where it happens, and the camera path is generated from that —
+so the moves mean something rather than being six variations on a push-in.
+
+| Chapter | Staged | What it does |
+| --- | --- | --- |
+| MYMO2 tracker | mat | Unit assembles on the cutting mat and powers up — status LED on a firmware double-blink, antenna radiating. The monitor behind it draws the unit's own live track. |
+| Shooting range | room | The camera turns away from the bench to a section of track laid on the lab floor. The controller case *is* the thing that moves: it rides a carriage with a training target bolted on beside it, driven by a pinion in the rack between the rails, while command packets arc out from the laptop on the bench behind the camera. Wheels, pinion and encoder all turn at the carriage's own measured speed and reverse with it. |
+| Device management | laptop | Camera turns to the laptop, which is running a staged firmware rollout: units download, verify, a few fail CRC and retry, the batch completes. |
+| Lifecycle database | laptop | A records table with milestones stamping in per unit as new serials are enrolled. |
+| Detection | laptop | The model's own inference view — tracked regions, identities, confidence, latency. |
+| Brain-controlled wheelchair | room | The camera turns roughly 180° away from the bench to the floor behind it, the room light comes up as the bench light drops, and the chair drives a demonstration run: electrodes fire on the EEG headset, a command packet crosses to the controller, the wheels turn. |
+
+The console programs (`three/bench/screens/programs.ts`) are drawn on a 2D
+canvas rather than in GLSL. A shader can fake the look of a console but not its
+content, and it is the content — unit IDs ticking over, a rollout stalling and
+retrying — that makes a screen read as software doing work. They are pure
+functions of elapsed time, redrawn at 12fps and only while their chapter is on
+screen.
+
+### The models
+
+Two devices are modelled from photographs of the real hardware:
+
+* **MYMO2 / VTM300 tracker** — moulded ABS shell, the unit's actual printed
+  markings, the Quectel carrier board, u.FL coax and film antenna, and the
+  keyed vehicle harness.
+* **Shooting-range target runner** — the ruggedised transit case (control
+  board behind its polycarbonate guard, battery, fuse block, motor driver on
+  its heatsink, loom and whip antenna) bolted to a bogie, with the brushed DC
+  gearmotor and its rack pinion out in the open underneath, and the training
+  target standing at the downrange end of the deck.
+
+The wheelchair is modelled to the project rather than to a photograph, and its
+EEG headset sits on a lab stand rather than on a mannequin — a headless figure
+in a wheelchair is an unpleasant image, and the equipment on a stand says the
+same thing about the work.
+
+The three software chapters keep a deliberately generic bench rig (board on
+standoffs, debug probe, breadboard) beside the laptop rather than an invented
+product — see the note at the top of `three/bench/devices/DevRig.tsx`. Chapter
+visuals are labelled *"Live 3D model · reconstruction"* for the same reason: the
+models are built to the real hardware, but they are reconstructions, not
+photographs.
+
+### Reference photographs
+
+`npm run photos` converts the originals in `pics/` into web-sized WebP under
+`public/assets/photos/`, which the bench monitors will then display next to the
+matching device.
+
+**This is opt-in and nothing depends on it.** Those photographs are of real
+production hardware and carry a unit serial number, a setup QR code and a
+regulatory certification number, so publishing them is a disclosure decision
+rather than a build step. Without them the monitors show the generated console
+artwork and the site is complete.

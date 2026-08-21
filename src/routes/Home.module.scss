@@ -1,6 +1,6 @@
 @use '../styles/tokens' as *;
 
-/* Content surface sits above the fixed monolith. Near-opaque for crisp text,
+/* Content surface sits above the fixed bench. Near-opaque for crisp text,
    with a faint sense of the object behind. Cheap (no backdrop blur). */
 .surface {
   position: relative;
@@ -13,4 +13,13 @@
 }
 .surface + .surface {
   box-shadow: none;
+}
+
+/* The work chapters are the one place the 3D scene is the subject rather than
+   the backdrop, so this wrapper stays transparent. Text readability is handled
+   per-column inside Work.module.scss — a full-width scrim here would defeat
+   the point. */
+.openStage {
+  position: relative;
+  z-index: 3;
 }

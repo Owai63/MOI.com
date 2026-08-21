@@ -6,7 +6,7 @@ export function Footer() {
   const copy = useCopy();
   const year = new Date().getFullYear();
   return (
-    <footer className={styles.footer} data-monolith-window>
+    <footer className={styles.footer} data-scene-window>
       <div className={`container ${styles.inner}`}>
         <div className={styles.left}>
           <span className={styles.mark} aria-hidden="true" />

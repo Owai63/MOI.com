@@ -1,6 +1,6 @@
 import { Loader } from '../components/Loader';
 import { Nav } from '../components/Nav';
-import { MonolithStage } from '../three/MonolithStage';
+import { BenchStage } from '../three/BenchStage';
 import { Hero } from '../components/sections/Hero';
 import { ImpactStrip } from '../components/sections/ImpactStrip';
 import { Interlude } from '../components/sections/Interlude';
@@ -13,7 +13,7 @@ import { Philosophy } from '../components/sections/Philosophy';
 import { Contact } from '../components/sections/Contact';
 import { Footer } from '../components/sections/Footer';
 import { useLenis } from '../lib/useLenis';
-import { useMonolithScroll } from '../lib/useMonolithScroll';
+import { useBenchScroll } from '../lib/useBenchScroll';
 import { useCopy } from '../i18n/useContent';
 import styles from './Home.module.scss';
 
@@ -30,7 +30,7 @@ import styles from './Home.module.scss';
  */
 export function Home() {
   useLenis(true);
-  useMonolithScroll(true);
+  useBenchScroll(true);
   const copy = useCopy();
 
   return (
@@ -38,7 +38,7 @@ export function Home() {
       <Loader />
       <div className="grain" aria-hidden="true" />
       <Nav />
-      <MonolithStage />
+      <BenchStage />
 
       <main id="main">
         <Hero />
@@ -46,8 +46,12 @@ export function Home() {
 
         <Interlude id="interlude-open" label={copy.interlude.open} />
 
-        <div className={styles.surface}>
+        {/* Transparent: the work chapters are the window onto the bench. */}
+        <div className={styles.openStage}>
           <Work />
+        </div>
+
+        <div className={styles.surface}>
           <FeaturedStory />
         </div>
 

@@ -13,6 +13,8 @@
     "start": "node --env-file-if-exists=.env server/index.mjs",
     "translate": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs scripts/translate.mts",
     "og": "node scripts/render-og.mjs",
+    "photos": "node scripts/prepare-photos.mjs",
+    "fallback": "node scripts/render-fallback.mjs",
     "translate:check": "node node_modules/tsx/dist/cli.mjs scripts/translate.mts --check"
   },
   "dependencies": {

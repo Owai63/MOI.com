@@ -1,3 +1,8 @@
+> **Note (2026-08):** the abstract monolith described below was replaced by
+> the workbench scene. The tiering, render-loop parking and reduced-motion
+> paths are unchanged and still apply; the specific mesh and shader counts are
+> historical. See README, "The workbench scene".
+
 # PERFORMANCE NOTES
 
 ## Bundle / loading

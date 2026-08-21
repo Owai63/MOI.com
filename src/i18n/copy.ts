@@ -26,6 +26,7 @@ export interface Copy {
     tagActive: string;
     tagConcept: string;
     tagNeeds: string;
+    tagLive: string;
     viewAll: string;
   };
   allProjects: {
@@ -80,11 +81,18 @@ export interface Copy {
     ownership: string;
     conceptual: string;
     conceptualViz: string;
+    explodeHint: string;
     illustrative: string;
     techStack: string;
     disclaimerNeeds: string;
     disclaimerNormal: string;
     discuss: string;
+  };
+  /** The scrolled sequence on the shooting-range case study. One caption per
+   *  beat of the choreography in three/bench/range/rangePath.ts. */
+  rangeSequence: {
+    hint: string;
+    beats: { title: string; body: string }[];
   };
 }
 
@@ -106,6 +114,9 @@ export const copyEn: Copy = {
     tagActive: 'Freelance · developing actively',
     tagConcept: 'Conceptual visualization',
     tagNeeds: 'Conceptual · content required',
+    // Shown under the live 3D window: the model is built to the real hardware,
+    // but it is a reconstruction, not a photograph.
+    tagLive: 'Live 3D model · reconstruction',
     viewAll: 'View all projects',
   },
   allProjects: {
@@ -181,6 +192,7 @@ export const copyEn: Copy = {
     ownership: 'Engineering ownership',
     conceptual: 'Conceptual',
     conceptualViz: 'Conceptual visualization',
+    explodeHint: 'Scroll to separate',
     illustrative: 'Illustrative diagram',
     techStack: 'Technology stack',
     disclaimerNeeds:
@@ -188,5 +200,34 @@ export const copyEn: Copy = {
     disclaimerNormal:
       'Conceptual visualizations on this page are clearly labelled and are not documentary screenshots or captured production data. Everything else reflects the work as recorded in the source portfolio.',
     discuss: 'Discuss this project →',
+  },
+  rangeSequence: {
+    hint: 'Scroll to run the lane',
+    beats: [
+      {
+        title: 'The lane',
+        body: 'An indoor bay, one rail down the centre of it, and a target that has to arrive exactly where the operator asked — every time, without anyone walking downrange.',
+      },
+      {
+        title: 'The command',
+        body: 'The operator picks a target and a distance. The console frames the request, addresses that unit, and puts it on the air as an XBee API packet.',
+      },
+      {
+        title: 'Away',
+        body: 'Nothing moves until the acknowledgement comes back. Then the driver comes up, the pinion takes the rack, and the carriage ramps off the near stop.',
+      },
+      {
+        title: 'Downrange',
+        body: 'Encoder counts, limit-switch handling and a speed ramp the firmware owns. The carriage knows where it is for the whole of the run, not just at the ends.',
+      },
+      {
+        title: 'Inside the case',
+        body: 'The sealed controller that rides with it: the ATSAME70 board, the motor driver, the battery and fuse block, and the radio the whole thing is commanded over.',
+      },
+      {
+        title: 'Home',
+        body: 'Return, park on the stop, report position — and take the next command, or a new firmware image, over the same link.',
+      },
+    ],
   },
 };
