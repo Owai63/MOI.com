@@ -70,4 +70,4 @@ Every project visual in the rebuild is **code-rendered (SVG/Canvas/WebGL)** and
 is labelled "Conceptual visualization" in the UI. None is presented as a
 documentary photo, screenshot, or captured telemetry. If real photos/renders
 from Higgsfield are added later, keep the "Conceptual visualization of…" label
-unless the asset is a genuine documentary capture (see IMAGE_GENERATION_LOG.md).
+unless the asset is a genuine documentary capture.

@@ -42,6 +42,11 @@ yarn-error.log*
 public/assets/generated/**/*.raw.png
 public/assets/generated/**/_masters/
 
+# --- Raw source photography (input to scripts/prepare-photos.mjs) ---
+# The optimised WebP the site actually ships lives in public/assets/generated/.
+# These originals are large and deliberately unpublished.
+pics/
+
 # --- Tooling / debug artefacts ---
 .playwright-mcp/
 *.tsbuildinfo
