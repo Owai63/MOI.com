@@ -24,9 +24,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+
+/* Model chain. The free Gemini tier caps *each* model at a small number of
+   requests per project per day (gemini-3.6-flash is 20/day), and once that is
+   spent every chat turn fails with 429 RESOURCE_EXHAUSTED. Rather than let the
+   assistant go dark for the rest of the day, we fall through to the next model
+   in the chain. Enabling billing on the API key removes the cap entirely and
+   makes the fallbacks mostly academic. */
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const FALLBACK_MODELS = (
+  process.env.GEMINI_FALLBACK_MODELS ??
+  'gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite'
+)
+  .split(',')
+  .map((m) => m.trim())
+  .filter(Boolean);
+const MODEL_CHAIN = [...new Set([MODEL, ...FALLBACK_MODELS])];
+
+/** Upstream statuses worth retrying on the next model in the chain. */
+const FALLTHROUGH = new Set([404, 429, 500, 503]);
 
 app.use(express.json({ limit: '256kb' }));
 
@@ -40,7 +58,12 @@ app.use((req, res, next) => {
 });
 
 app.get('/api/health', (_req, res) =>
-  res.json({ ok: true, model: MODEL, keyConfigured: Boolean(API_KEY) }),
+  res.json({
+    ok: true,
+    model: MODEL,
+    modelChain: MODEL_CHAIN,
+    keyConfigured: Boolean(API_KEY),
+  }),
 );
 
 function systemPrompt(lang) {
@@ -63,11 +86,45 @@ KNOWLEDGE:
 ${KNOWLEDGE}`;
 }
 
+/** Extract the reply text out of a Gemini generateContent response. */
+function replyFrom(data) {
+  return (
+    data?.candidates?.[0]?.content?.parts
+      ?.map((p) => p.text)
+      .filter(Boolean)
+      .join('') || ''
+  );
+}
+
+/** Seconds Gemini asked us to wait, if it said so. */
+function retryAfterSeconds(detail) {
+  const match = /"retryDelay":\s*"(\d+)s"/.exec(detail);
+  return match ? Number(match[1]) : null;
+}
+
+async function callGemini(model, body) {
+  const url =
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}` +
+    `:generateContent?key=${encodeURIComponent(API_KEY)}`;
+
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!r.ok) {
+    const detail = await r.text();
+    return { ok: false, status: r.status, detail };
+  }
+  return { ok: true, status: 200, data: await r.json() };
+}
+
 app.post('/api/chat', async (req, res) => {
   if (!API_KEY) {
     return res
       .status(500)
-      .json({ error: 'Server is missing GEMINI_API_KEY.' });
+      .json({ error: 'Server is missing GEMINI_API_KEY.', code: 'no_key' });
   }
   try {
     const { messages, lang } = req.body ?? {};
@@ -90,36 +147,45 @@ app.post('/api/chat', async (req, res) => {
       generationConfig: { temperature: 0.4, maxOutputTokens: 800, topP: 0.9 },
     };
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      MODEL,
-    )}:generateContent?key=${encodeURIComponent(API_KEY)}`;
+    let last = null;
+    for (const model of MODEL_CHAIN) {
+      const attempt = await callGemini(model, body);
 
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+      if (attempt.ok) {
+        const reply = replyFrom(attempt.data);
+        if (reply) return res.json({ reply, model });
+        // An empty candidate is usually a safety block — another model is
+        // unlikely to do better, so stop here rather than burn the chain.
+        console.error('Empty reply from', model);
+        return res
+          .status(502)
+          .json({ error: 'Empty response from model.', code: 'empty' });
+      }
 
-    if (!r.ok) {
-      const detail = await r.text();
-      console.error('Gemini error', r.status, detail);
-      return res.status(502).json({ error: 'Upstream model error.' });
+      last = attempt;
+      console.error(`Gemini error (${model})`, attempt.status, attempt.detail);
+      if (!FALLTHROUGH.has(attempt.status)) break;
     }
 
-    const data = await r.json();
-    const reply =
-      data?.candidates?.[0]?.content?.parts
-        ?.map((p) => p.text)
-        .filter(Boolean)
-        .join('') || '';
-
-    if (!reply) {
-      return res.status(502).json({ error: 'Empty response from model.' });
+    // Every model in the chain refused. Tell the client *why* — a spent daily
+    // quota is a wait-and-retry condition, not a broken assistant, and the
+    // widget shows a different message for it.
+    if (last?.status === 429) {
+      const wait = retryAfterSeconds(last.detail);
+      if (wait) res.setHeader('Retry-After', String(wait));
+      return res.status(429).json({
+        error: 'The assistant has reached its request limit.',
+        code: 'rate_limited',
+        retryAfter: wait,
+      });
     }
-    res.json({ reply });
+
+    return res
+      .status(502)
+      .json({ error: 'Upstream model error.', code: 'upstream' });
   } catch (err) {
     console.error('chat handler failed', err);
-    res.status(500).json({ error: 'Assistant failed.' });
+    res.status(500).json({ error: 'Assistant failed.', code: 'unknown' });
   }
 });
 
@@ -134,5 +200,7 @@ app.use(express.static(distDir));
 app.get('*', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
 
 app.listen(PORT, () => {
-  console.log(`Server on :${PORT} · model ${MODEL} · key ${API_KEY ? 'set' : 'MISSING'}`);
+  console.log(
+    `Server on :${PORT} · models ${MODEL_CHAIN.join(' → ')} · key ${API_KEY ? 'set' : 'MISSING'}`,
+  );
 });

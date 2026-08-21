@@ -28,6 +28,7 @@ export interface UiStrings {
   chatSend: string;
   chatGreeting: string;
   chatError: string;
+  chatBusy: string;
   chatThinking: string;
   chatDownloadCv: string;
   chatSuggest1: string;
@@ -84,6 +85,8 @@ export const uiEn: UiStrings = {
     "Hi — I'm the assistant for this portfolio. Ask me about Owais's embedded and IoT work, experience, or skills. I can also generate his CV.",
   chatError:
     'Sorry, I could not reach the assistant. Please try again in a moment.',
+  chatBusy:
+    'The assistant has reached its request limit for now. Please try again later, or email owais1.iqbal@gmail.com.',
   chatThinking: 'Thinking…',
   chatDownloadCv: 'Download CV',
   chatSuggest1: 'What does Owais do?',

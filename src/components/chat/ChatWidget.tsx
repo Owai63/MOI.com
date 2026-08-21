@@ -56,8 +56,19 @@ export function ChatWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: next, lang }),
       });
+      const data = (await res.json().catch(() => ({}))) as {
+        reply?: string;
+        error?: string;
+        code?: string;
+      };
+      // A spent API quota is a wait-and-retry condition, not a dead assistant —
+      // say so instead of claiming we could not reach it.
+      if (res.status === 429 || data.code === 'rate_limited') {
+        setError(true);
+        setMessages((m) => [...m, { role: 'assistant', content: ui.chatBusy }]);
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as { reply?: string; error?: string };
       if (!data.reply) throw new Error('empty');
       setMessages((m) => [...m, { role: 'assistant', content: data.reply as string }]);
     } catch {
