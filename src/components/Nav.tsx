@@ -112,7 +112,7 @@ export function Nav() {
       <header className={`${styles.nav} ${scrolled ? styles.scrolled : ''}`}>
         <a href="#top" className={styles.logo} aria-label={ui.navHome}>
           <span className={styles.logoMark} aria-hidden="true" />
-          MOI<span className={styles.logoDim}>·ENG</span>
+          MOI
         </a>
 
         {/* The availability indicator lives in the hero and contact section —

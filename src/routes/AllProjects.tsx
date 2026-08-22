@@ -37,7 +37,7 @@ export function AllProjects() {
       <header className={styles.bar}>
         <Link to="/" className={styles.home}>
           <span className={styles.mark} aria-hidden="true" />
-          MOI<span className={styles.dim}>·ENG</span>
+          MOI
         </Link>
         <Link to="/#work" className={styles.back}>
           {copy.allProjects.back}

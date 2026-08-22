@@ -31,13 +31,10 @@
   font-weight: 600;
   font-size: 1rem;
   letter-spacing: 0.02em;
-  // The wordmark is a Latin identifier — it must never be reordered to
-  // "ENG·MOI" when the document flips to RTL.
+  // The wordmark is a Latin identifier and stays left-to-right even when the
+  // document flips to RTL.
   direction: ltr;
   unicode-bidi: isolate;
-}
-.logoDim {
-  color: var(--text-mute);
 }
 .logoMark {
   width: 10px;
