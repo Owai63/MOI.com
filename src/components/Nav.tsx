@@ -129,9 +129,15 @@ export function Nav() {
           ))}
         </nav>
 
+        {/* The language switch sits in the bar at EVERY width, not inside the
+            mobile menu. Someone who needs Arabic should not have to discover
+            it behind a hamburger first — it has to be the thing they see. The
+            CV button is the one that folds into the drawer on a phone: its
+            label is too wide for the bar and it is not urgent in the way a
+            language is. */}
         <div className={styles.actions}>
           <LangToggle />
-          <CvButton />
+          <CvButton className={styles.headerCv} />
         </div>
 
         <button
@@ -144,6 +150,7 @@ export function Nav() {
           <span />
           <span />
         </button>
+
       </header>
 
       <div
@@ -151,11 +158,6 @@ export function Nav() {
         className={`${styles.drawer} ${open ? styles.drawerOpen : ''}`}
         hidden={!open}
       >
-        {/* Language first: someone who needs Arabic needs it before they read
-            any of the links below it. */}
-        <div className={styles.drawerTop}>
-          <LangToggle className={styles.drawerLang} />
-        </div>
         <nav aria-label={ui.navMobile}>
           {nav.map((n) => (
             <a key={n.href} href={n.href} onClick={() => setOpen(false)}>

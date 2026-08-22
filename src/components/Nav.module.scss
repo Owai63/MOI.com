@@ -87,14 +87,32 @@
 
 /* action cluster (language toggle + CV) */
 .actions {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 0.6rem;
+  // On a phone this cluster claims the bar's free space; once the links
+  // appear at tablet widths they take that job over.
+  margin-inline-start: auto;
+  @include up($bp-tablet) {
+    margin-inline-start: 0;
+  }
+}
+/* The CV button is bar furniture only where there is room for its label. */
+.headerCv {
+  display: none;
   @include up($bp-tablet) {
     display: inline-flex;
   }
 }
 .langToggle {
+  // A bar control on touch needs a real target; the desktop bar keeps the
+  // tighter pill it was designed with.
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  @include up($bp-tablet) {
+    min-height: 0;
+  }
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   letter-spacing: 0.06em;
@@ -132,20 +150,10 @@
 }
 
 /* drawer clusters */
-.drawerTop {
-  display: flex;
-  justify-content: center;
-}
 .drawerActions {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-.drawerLang {
-  font-size: 0.9rem;
-  padding: 0.55rem 1.4rem;
-  color: var(--text);
-  border-color: var(--cyan-dim);
 }
 .drawerCv {
   font-size: 0.9rem;
@@ -154,7 +162,6 @@
 
 /* burger */
 .burger {
-  margin-inline-start: auto;
   width: 40px;
   height: 40px;
   display: inline-flex;
