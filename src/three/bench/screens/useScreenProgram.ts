@@ -19,7 +19,13 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { ScreenProgram } from './programs';
 
-const REDRAW_HZ = 12;
+/* Consoles do not animate at 60fps — the slight stutter is what a real
+   dashboard looks like — and every redraw here costs a full texture upload of
+   the whole canvas, on the main thread, which is the kind of periodic hitch a
+   reader feels as a scroll stutter rather than as a slow frame. At 1024x678
+   RGBA that is ~2.8MB per upload; ten a second is a bill worth keeping an eye
+   on, and twelve bought nothing visible. */
+const REDRAW_HZ = 10;
 
 export function useScreenProgram(
   program: ScreenProgram | null,

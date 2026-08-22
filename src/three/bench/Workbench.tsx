@@ -39,8 +39,9 @@ import { Desk, StageMat, Chair, BattenLight, Dressing } from './props/Furniture'
 import { Monitors, Laptop } from './props/Computers';
 import { Oscilloscope, PowerSupply } from './props/Instruments';
 import { Room } from './props/Room';
+import { RoomShell } from './props/RoomShell';
+import { Static } from './parts/Static';
 import {
-  BENCH,
   STAGE,
   ROOM,
   LAPTOP,
@@ -51,7 +52,6 @@ import {
   CHAIR_POSITION,
   BATTEN,
 } from './layout';
-import { benchMaterials } from './materials';
 
 type Detail = 'high' | 'low';
 
@@ -154,7 +154,6 @@ export function Workbench({
   slug?: string;
   detail: Detail;
 }) {
-  const m = benchMaterials();
   const bench = mode === 'bench';
 
   /* dev-only: expose the graph, and a picker, so the scene can be inspected
@@ -164,6 +163,7 @@ export function Workbench({
   const scene = useThree((s) => s.scene);
   const camera = useThree((s) => s.camera);
   const raycaster = useThree((s) => s.raycaster);
+  const gl = useThree((s) => s.gl);
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     const w = window as unknown as {
@@ -172,6 +172,12 @@ export function Workbench({
     };
     w.__benchScene = scene;
     (w as { __benchCamera?: THREE.Camera }).__benchCamera = camera;
+    /* The renderer, for `npm run perf`. What that measurement wants is
+       `info.render.calls`, `info.render.triangles` and `info.programs.length`,
+       and those are the rare numbers that are worth taking from a headless
+       run: they are exactly the same on a software rasteriser as on a real
+       GPU, where a frame RATE from SwiftShader means nothing at all. */
+    (w as { __benchGl?: THREE.WebGLRenderer }).__benchGl = gl;
     w.__pick = (u, v) => {
       raycaster.setFromCamera(new THREE.Vector2(u * 2 - 1, -(v * 2 - 1)), camera);
       // the default line threshold is a whole world unit: without this the
@@ -206,7 +212,7 @@ export function Workbench({
         mat ? `col#${mat.color?.getHexString()} em${(mat.emissiveIntensity ?? 0).toFixed(2)}` : 'nomat',
       ].join(' ');
     };
-  }, [scene, camera, raycaster]);
+  }, [scene, camera, raycaster, gl]);
 
   // one gate per device, written from the shared state every frame
   const gates = useMemo(
@@ -248,31 +254,54 @@ export function Workbench({
 
   return (
     <group>
-      {/* --- room ---------------------------------------------------------- */}
-      <mesh position={[0, BENCH.floorY, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={m.floor}>
-        <planeGeometry args={[14, 14]} />
-      </mesh>
-      {/* the room shell — never lit directly, it only stops the background
-          reading as an infinite void behind the bench */}
-      <mesh position={[0, 0.6, 0.6]} material={m.wall}>
-        <boxGeometry args={[16, 6, 12]} />
-      </mesh>
+      {/* --- the building --------------------------------------------------- */}
+      {/* Six real surfaces at real dimensions, not a flipped box in the far
+          distance. The camera walks around inside this now, so it has to hold
+          up from anywhere on the floor.
 
-      {/* --- bench --------------------------------------------------------- */}
-      <Desk />
-      <StageMat />
-      <Chair position={CHAIR_POSITION} />
-      <BattenLight position={BATTEN.position} length={BATTEN.length} />
+          Everything in this Static block has a fixed transform for the whole
+          life of the page — the building, the bench, the chair, and the set
+          dressing on it. Between them they are most of the object count in the
+          scene, and taking them out of the per-frame matrix walk is free. */}
+      <Static>
+        <RoomShell detail={detail} />
+        <Desk />
+        <StageMat />
+        <Chair position={CHAIR_POSITION} />
+        <Dressing detail={detail} />
 
-      {/* --- the floor area the camera turns around to face ----------------- */}
+        {/* The instruments and screens belong in here too, which is less
+            obvious than the walls: they are the most animated objects on the
+            bench. But everything that moves about them is a MATERIAL — a
+            screen swapping its map, a readout brightening, the scope's shader
+            uniforms — and merging shares material objects rather than copying
+            them, so all of that still works. Not one of them changes a
+            transform after mount.
+
+            Putting them under the same Static as the room is what makes the
+            merge worth having: they are built from the same shared aluminium,
+            polymer and chassis materials as the bench and the building, so
+            merging by material collapses across all of them at once instead of
+            once per component. */}
+        <Oscilloscope position={SCOPE.position} rotation={[0, SCOPE.yaw, 0]} detail={detail} />
+        <PowerSupply position={PSU.position} rotation={[0, PSU.yaw, 0]} detail={detail} />
+        <Monitors position={MONITORS.position} rotation={[0, MONITORS.yaw, 0]} detail={detail} />
+        <Laptop position={LAPTOP.position} rotation={[0, LAPTOP.yaw, 0]} detail={detail} />
+
+        {/* The batten's tube dims with the chapter, which is again a material
+            and not a transform. The LIGHT it stands for lives in the canvas
+            rig, not in here — a real light inside a subtree whose world
+            matrices have stopped updating would quietly stop being aimed. */}
+        <BattenLight position={BATTEN.position} length={BATTEN.length} />
+      </Static>
+
+      {/* --- the floor area the camera turns around to face -----------------
+          Outside the Static block, and it has to be: the lamp over the work
+          square owns a spotLight whose TARGET travels to follow the chapter,
+          and three reads a light's aim from that target's world matrix every
+          frame. Freeze the matrices under it and the lamp goes on pointing
+          wherever the target stood when the page loaded. */}
       <Room roomChapters={ROOM_CHAPTERS} detail={detail} />
-
-      {/* --- instruments and screens --------------------------------------- */}
-      <Oscilloscope position={SCOPE.position} rotation={[0, SCOPE.yaw, 0]} />
-      <PowerSupply position={PSU.position} rotation={[0, PSU.yaw, 0]} />
-      <Monitors position={MONITORS.position} rotation={[0, MONITORS.yaw, 0]} />
-      <Laptop position={LAPTOP.position} rotation={[0, LAPTOP.yaw, 0]} />
-      <Dressing detail={detail} />
 
       {/* --- devices ------------------------------------------------------- */}
       {DEVICES.slice(0, mounted).map((entry, i) => (

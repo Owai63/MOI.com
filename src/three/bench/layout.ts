@@ -78,6 +78,48 @@ export const BATTEN = {
   length: 1.06,
 };
 
+/* --- the shell -----------------------------------------------------------
+
+   The architecture, as six planes. One place for these because three
+   different things have to agree on them: RoomShell draws them, cameraRig
+   clamps the camera inside them, and the lighting rig hangs fixtures off the
+   ceiling height. A wall moved in only one of those shows up as the camera
+   stopping short of nothing, or as a fixture buried in the slab.
+
+   The bench stands against the front wall, which is what makes the walkable
+   floor a single simply-connected region and lets one walkway loop reach
+   everything in the room.                                                  */
+
+export const SHELL = {
+  minX: -3.7,
+  maxX: 3.7,
+  /** the wall the bench backs onto. */
+  frontZ: -1.2,
+  /** the wall with the doorway in it, at the far end of the room. */
+  backZ: 3.9,
+  /** 3m floor-to-ceiling. */
+  ceilingY: BENCH.floorY + 3.0,
+  /** underside of the suspended ceiling fixtures. */
+  fixtureY: BENCH.floorY + 2.62,
+} as const;
+
+/** Where the ceiling fixtures hang, and therefore where the room lights are.
+ *  Laid over the open floor rather than over the bench, which has its own.
+ *
+ *  TWO, not three, and the count is a performance decision as much as a
+ *  lighting one. Three.js forward-renders: every lit fragment in the frame
+ *  loops over every light in the scene, so each fixture here is paid for on
+ *  every pixel of a full-viewport canvas, whether or not any of its light
+ *  reaches that pixel. Three fixtures over a 7x5m room looked marginally
+ *  better and cost the entire scene a third more fragment work than two do.
+ *
+ *  Read by BOTH the fixtures in RoomShell and the lights in BenchCanvas, so
+ *  the thing you can see and the thing doing the lighting cannot drift apart. */
+export const CEILING_FIXTURES: [number, number][] = [
+  [-1.5, 1.5],
+  [-0.2, 3.0],
+];
+
 /* --- the room behind the bench ------------------------------------------- */
 
 /** The floor area the camera turns around to face. The bench occupies
@@ -86,7 +128,8 @@ export const BATTEN = {
 export const ROOM = {
   /** where a floor-standing subject is placed. */
   stage: [0.24, BENCH.floorY, 2.45] as [number, number, number],
-  /** back wall of the room, behind that subject. */
+  /** back wall of the room, behind that subject. Same plane as SHELL.backZ,
+   *  which is where it is actually drawn. */
   wallZ: 3.9,
   /** The lamp that comes up when the room is in use. High enough to sit above
    *  the frame at the room chapter's standoff — a bare emissive strip across

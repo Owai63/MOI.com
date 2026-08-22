@@ -1,14 +1,19 @@
 /* ============================================================================
-   Room — the floor area behind the bench
+   Room — the work area out on the floor
    ----------------------------------------------------------------------------
-   Only one chapter looks this way, so the room is deliberately spare: a back
-   wall with a doorway, a length of floor with a taped work square on it, and
-   a couple of things that say "lab" without asking to be looked at. The
-   subject is whatever is standing on the floor, not the set.
+   The architecture moved to RoomShell when the camera started walking around
+   the room; what is left here is the WORK AREA — the taped square on the
+   floor, the fixture over it, and the lighting that responds to a chapter
+   arriving. That split matters: the shell is always there and never changes,
+   this reacts.
 
-   The light over this area is dark until the chapter arrives, then comes up.
-   That is what sells the camera turn as *going somewhere* rather than as the
-   bench having a second wall.
+   The light over this area used to be dark until its chapter arrived, which
+   sold the camera turn as going somewhere. That is no longer the right trade.
+   The reader can now see this end of the room from most of the walk, and an
+   area that is pitch black until you are told to look at it reads as a set
+   being struck rather than as a lab. So it now sits at a working level and
+   LIFTS for its chapter, which is the same beat played at a level that
+   survives being looked at from across the room.
    ========================================================================== */
 
 import { useMemo, useRef } from 'react';
@@ -29,7 +34,6 @@ export function Room({
 }) {
   const m = benchMaterials();
   const lamp = useRef<THREE.SpotLight>(null);
-  const fill = useRef<THREE.PointLight>(null);
   const strip = useRef<THREE.MeshStandardMaterial>(null);
 
   /* The lamp's aim point, as a real object in the scene.
@@ -81,59 +85,22 @@ export function Room({
          so aimed the cone at the bench instead; with the aim fixed the same
          floor gets there on rather less, and a 1.7m target standing under it
          no longer clips to white. */
-      lamp.current.intensity = THREE.MathUtils.damp(lamp.current.intensity, on * 70, 1.8, d);
-    }
-    if (fill.current) {
-      fill.current.intensity = THREE.MathUtils.damp(fill.current.intensity, on * 22, 1.8, d);
+      lamp.current.intensity = THREE.MathUtils.damp(lamp.current.intensity, 30 + on * 58, 1.8, d);
     }
     if (strip.current) {
       strip.current.emissiveIntensity = THREE.MathUtils.damp(
         strip.current.emissiveIntensity,
-        0.12 + on * 0.7,
+        0.55 + on * 0.85,
         1.8,
         d,
       );
     }
   });
 
-  const wallZ = ROOM.wallZ;
   const floorY = BENCH.floorY;
 
   return (
     <group>
-      {/* back wall */}
-      <mesh position={[0, floorY + 1.6, wallZ]} receiveShadow>
-        <planeGeometry args={[12, 3.2]} />
-        <meshStandardMaterial color="#0d1015" roughness={0.96} metalness={0} side={THREE.DoubleSide} />
-      </mesh>
-      {/* skirting */}
-      <mesh position={[0, floorY + 0.06, wallZ - 0.012]}>
-        <boxGeometry args={[12, 0.12, 0.024]} />
-        <meshStandardMaterial color="#15191f" roughness={0.9} />
-      </mesh>
-
-      {/* doorway: a recess with light spilling from the corridor beyond */}
-      <group position={[-1.85, floorY, wallZ - 0.02]}>
-        <mesh position={[0, 1.02, 0]}>
-          <planeGeometry args={[0.92, 2.04]} />
-          <meshStandardMaterial
-            color="#0a0d11"
-            emissive={new THREE.Color('#2a3a4a')}
-            emissiveIntensity={0.5}
-            roughness={0.9}
-          />
-        </mesh>
-        {/* frame */}
-        {[-1, 1].map((s) => (
-          <mesh key={s} position={[s * 0.48, 1.02, 0.02]} material={m.chassis}>
-            <boxGeometry args={[0.05, 2.08, 0.05]} />
-          </mesh>
-        ))}
-        <mesh position={[0, 2.06, 0.02]} material={m.chassis}>
-          <boxGeometry args={[1.0, 0.05, 0.05]} />
-        </mesh>
-      </group>
-
       {/* the batten over the work square */}
       <group position={[ROOM.light[0], ROOM.light[1], ROOM.light[2]]}>
         <mesh material={m.polymer}>
@@ -145,7 +112,7 @@ export function Room({
             ref={strip}
             color="#0e1114"
             emissive={new THREE.Color('#dceeff')}
-            emissiveIntensity={0.15}
+            emissiveIntensity={0.55}
             toneMapped={false}
             roughness={0.4}
           />
@@ -160,25 +127,16 @@ export function Room({
         penumbra={1}
         distance={7}
         decay={2}
-        intensity={0}
+        intensity={30}
         color="#e2f0ff"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0008}
-        shadow-camera-near={0.5}
-        shadow-camera-far={8}
       />
-      {/* Cool fill from the bench side. Without it a dark-framed chair against
-          a dark wall is a silhouette, and the point of turning round is to
-          look at the thing, not at its outline. */}
-      <pointLight
-        ref={fill}
-        position={[ROOM.stage[0] - 1.1, floorY + 1.15, ROOM.stage[2] - 1.5]}
-        intensity={0}
-        distance={7}
-        decay={2}
-        color="#9dc6ff"
-      />
+      {/* The cool fill from the bench side that used to sit here is gone. It
+          existed because a dark-framed chair against a dark wall was a
+          silhouette — which was true when this end of the room was unlit
+          except during its own chapter. The ceiling run is on all the time
+          now and does the same job from a position the reader can see, so the
+          fill was a second per-fragment light in every frame of the whole
+          page buying something the room already had. */}
 
       {/* taped work square on the floor — where equipment gets set up */}
       {detail === 'high' && (
@@ -193,22 +151,6 @@ export function Room({
             <mesh key={s} position={[s * 1.1, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
               <planeGeometry args={[0.035, 1.93]} />
               <meshStandardMaterial color="#7a6520" roughness={0.92} />
-            </mesh>
-          ))}
-        </group>
-      )}
-
-      {/* A rolling tool cabinet against the wall, for depth. Kept on the
-          left-hand side: the range lane runs down the right, and a black
-          cabinet directly behind a target is a hole, not a background. */}
-      {detail === 'high' && (
-        <group position={[-1.0, floorY, wallZ - 0.34]}>
-          <mesh position={[0, 0.44, 0]} castShadow receiveShadow material={m.chassis}>
-            <boxGeometry args={[0.72, 0.88, 0.46]} />
-          </mesh>
-          {[0.22, 0.44, 0.66].map((y) => (
-            <mesh key={y} position={[0, y, 0.235]} material={m.polymer}>
-              <boxGeometry args={[0.64, 0.03, 0.012]} />
             </mesh>
           ))}
         </group>

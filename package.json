@@ -3,7 +3,7 @@
   "private": true,
   "version": "6.0.0",
   "type": "module",
-  "description": "ENGINEERED REALITY — cinematic portfolio for Muhammad Owais Iqbal Malik, Embedded Systems & IoT Engineer",
+  "description": "ENGINEERED REALITY \u2014 cinematic portfolio for Muhammad Owais Iqbal Malik, Embedded Systems & IoT Engineer",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -15,7 +15,9 @@
     "og": "node scripts/render-og.mjs",
     "photos": "node scripts/prepare-photos.mjs",
     "fallback": "node scripts/render-fallback.mjs",
-    "translate:check": "node node_modules/tsx/dist/cli.mjs scripts/translate.mts --check"
+    "translate:check": "node node_modules/tsx/dist/cli.mjs scripts/translate.mts --check",
+    "perf": "node scripts/perf.mjs",
+    "check:camera": "node scripts/check-camera.mjs && node scripts/framecheck.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.3",

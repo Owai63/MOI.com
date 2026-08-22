@@ -296,7 +296,7 @@ function FiringPoint({
         {/* the console itself — the lane list, running */}
         {/* Turned back toward the operator, who stands behind the line facing
             downrange — so the screen faces up the lane, not down it. */}
-        <Laptop position={[0.08, 0.945, 0.02]} rotation={[0, -2.25, 0]} program="range" />
+        <Laptop position={[0.08, 0.945, 0.02]} rotation={[0, -2.25, 0]} program="range" detail={detail} />
         {/* the range's own radio, patched into the laptop */}
         {detail === 'high' && (
           <group position={[-0.44, 0.985, -0.10]} rotation={[0, 0.5, 0]}>

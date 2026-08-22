@@ -14,6 +14,7 @@
    ========================================================================== */
 
 import * as THREE from 'three';
+import { keySlots, type KeyRow } from './parts/keyboardLayout';
 
 /* --- deterministic noise -------------------------------------------------- */
 
@@ -857,5 +858,112 @@ export function sevenSegTexture(value: string, unit: string) {
     ctx.fillText(unit, 214, 70);
 
     return finish(canvas);
+  });
+}
+
+/* ============================================================================
+   Keyboard and screen furniture
+   ==========================================================================*/
+
+/** The legends, as one transparent plane laid over the instanced caps.
+ *
+ *  Drawn from the same slot table the caps are placed from (parts/
+ *  keyboardLayout.ts), so a letter cannot end up on the wrong key. Glyphs are
+ *  white on transparent because the material tints them: on a backlit board
+ *  the legend is a hole cut in the cap with the backlight behind it, not ink,
+ *  and colouring it here would fight the emissive.
+ */
+export function keyLegendTexture(rows: KeyRow[]) {
+  return cached('keys', () => {
+    const W = 1024;
+    const H = 460;
+    const { canvas, ctx } = surface(W, H);
+    ctx.clearRect(0, 0, W, H);
+
+    for (const slot of keySlots(rows)) {
+      if (!slot.label) continue;
+      const x = slot.cx * W;
+      const y = slot.cy * H;
+      /* Legend size follows the key it is on, capped so a wide key does not
+         get a huge letter — the letter on a two-unit backspace is the same
+         size as the one on a 1u key. */
+      const size = Math.min(slot.h * H * 0.46, 26);
+      ctx.font = `500 ${size}px ui-sans-serif, system-ui, "Segoe UI", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      /* Legends sit slightly high and left of the cap centre, as they do on a
+         real cap — the bottom half is where the shifted glyph would go. */
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillText(slot.label, x, y - slot.h * H * 0.06);
+    }
+
+    /* Nearest-neighbour would crawl as the camera moves; the default trilinear
+       filter is right here, and the anisotropy matters because this plane is
+       almost always seen at a grazing angle. */
+    const tex = finish(canvas, { aniso: 16 });
+    return tex;
+  });
+}
+
+/** The glow a lit panel throws onto the air AROUND it.
+ *
+ *  Additively blended, so this is a mask rather than a colour — and the mask
+ *  is a ring, not a disc. The first version was a disc, which meant the
+ *  brightest part of the glow sat directly over the middle of the screen and
+ *  added a flat wash to everything the screen was trying to show. That is the
+ *  wrong physics as well as the wrong picture: a screen does not glow onto
+ *  itself. The light in the air is what you see beside and in front of the
+ *  bezel, so the centre is punched out to well past the edge of the panel and
+ *  the ring peaks outside it.
+ *
+ *  The plane this is mapped to is roughly 2.2x the panel, so the panel edge
+ *  falls near r = 0.45 and the ramp starts outside that. */
+export function screenGlowTexture() {
+  return cached('screen-glow', () => {
+    const S = 256;
+    const { canvas, ctx } = surface(S, S);
+    const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    g.addColorStop(0, 'rgba(255,255,255,0)');
+    g.addColorStop(0.48, 'rgba(255,255,255,0)');
+    g.addColorStop(0.66, 'rgba(255,255,255,0.55)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+    return finish(canvas);
+  });
+}
+
+/** The fine vertical stripe of an LCD subpixel grid, plus the faint diffuser
+ *  mottle of an anti-glare coating.
+ *
+ *  Used as a roughness map on the glass layer rather than as a colour: painted
+ *  into the albedo it would alias into moire the moment the panel is more than
+ *  a foot away, but as a roughness break-up it only ever shows as the slightly
+ *  uneven sheen a matte panel gives back, which is exactly the tell that
+ *  separates a screen from a lit rectangle.
+ */
+export function panelCoatTexture() {
+  return cached('panel-coat', () => {
+    const W = 512;
+    const H = 512;
+    const { canvas, ctx } = surface(W, H);
+    const rnd = prng(7711);
+
+    ctx.fillStyle = '#b4b4b4';
+    ctx.fillRect(0, 0, W, H);
+
+    // anti-glare diffuser: fine, dense, low-contrast speckle
+    for (let i = 0; i < 26000; i++) {
+      const a = rnd() * 0.16;
+      ctx.fillStyle = rnd() < 0.5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a})`;
+      ctx.fillRect(rnd() * W, rnd() * H, 1.4, 1.4);
+    }
+    // the panel's own vertical structure, very faint
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    for (let x = 0; x < W; x += 3) ctx.fillRect(x, 0, 1, H);
+
+    const tex = finish(canvas, { srgb: false, aniso: 8 });
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
   });
 }
