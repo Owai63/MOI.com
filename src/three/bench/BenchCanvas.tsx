@@ -35,6 +35,7 @@ import { isRoomChapter } from './devices/registry';
 import { disposeMaterials } from './materials';
 import { disposeTextures } from './textures';
 import type { DeviceProfile } from '../../lib/quality';
+import { DEVICES } from './devices/registry';
 
 export type StageMode = 'bench' | 'inspect' | 'range';
 
@@ -84,10 +85,18 @@ function CameraRig({ mode }: { mode: StageMode }) {
       const ratio = Math.min(MAX_PULLBACK, REFERENCE_ASPECT / Math.max(0.35, aspect));
       forward.copy(target.current).sub(look.current);
       const standoff = forward.length();
-      const scale =
-        mode === 'range'
-          ? Math.min(ratio, (standoff + RANGE_PULLBACK_M) / Math.max(0.01, standoff))
-          : ratio;
+      /* The metres-not-multiplier rule has to cover the room-staged chapters
+         on the bench too, not just the case study's range set. Those are shot
+         from 3.7m and 5.2m, and 2.4x on that walks the camera back through the
+         bench and out of the building — which is exactly why the shooting
+         range and the wheelchair chapters showed an empty frame on a phone
+         while every bench-top chapter was fine. */
+      const roomShot =
+        mode === 'range' ||
+        (mode === 'bench' && DEVICES[sceneState.activeProject]?.stageKind === 'room');
+      const scale = roomShot
+        ? Math.min(ratio, (standoff + RANGE_PULLBACK_M) / Math.max(0.01, standoff))
+        : ratio;
       forward.multiplyScalar(scale);
       target.current.copy(look.current).add(forward);
     }

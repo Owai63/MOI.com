@@ -171,6 +171,7 @@ export function Workbench({
       __pick?: (u: number, v: number) => string;
     };
     w.__benchScene = scene;
+    (w as { __benchCamera?: THREE.Camera }).__benchCamera = camera;
     w.__pick = (u, v) => {
       raycaster.setFromCamera(new THREE.Vector2(u * 2 - 1, -(v * 2 - 1)), camera);
       // the default line threshold is a whole world unit: without this the
