@@ -1206,14 +1206,131 @@ export const philosophy = {
 
 /* --------------------------------------------------------------------------
    NAVIGATION
+   ----------------------------------------------------------------------------
+   Four top-level destinations, each of which now carries a submenu that is a
+   real table of contents for what lives under it. The bar stayed uncrowded
+   when the only way to reach Capabilities, Philosophy or the featured system
+   was to scroll past them and hope — which is exactly the problem: a section
+   nobody can address is a section nobody can find.
+
+   `id` and `href` are skip-listed for translation (see i18n/translatable.ts),
+   so the routing is language-stable while every label and hint is localized.
    -------------------------------------------------------------------------- */
-/* Four links only — the header stays uncrowded at tablet widths. Capabilities
-   is reachable by scrolling from Work; availability moved into the hero. */
-export const nav = [
-  { label: 'Work', href: '#work' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
+
+export interface NavChild {
+  /** an in-page anchor ('#work'), a route ('/work'), or an absolute URL. */
+  href: string;
+  label: string;
+  /** one line of orientation, shown under the label in the desktop panel. */
+  hint: string;
+  /** leaves the site — opened in a new tab and marked as such. */
+  external?: boolean;
+}
+
+export interface NavItem {
+  /** stable key. Never translated; the menu behaviour keys off it. */
+  id: string;
+  label: string;
+  href: string;
+  children: NavChild[];
+  /** true = the featured case studies are spliced into this menu at render
+   *  time, so their names are never written down twice. */
+  projects?: boolean;
+}
+
+export const nav: NavItem[] = [
+  {
+    id: 'work',
+    label: 'Work',
+    href: '#work',
+    projects: true,
+    children: [
+      {
+        href: '#work',
+        label: 'Selected systems',
+        hint: 'The six chapters, staged on the bench.',
+      },
+    ],
+  },
+  {
+    id: 'experience',
+    label: 'Experience',
+    href: '#experience',
+    children: [
+      {
+        href: '#experience',
+        label: 'Career timeline',
+        hint: 'Where the systems were built, role by role.',
+      },
+      {
+        href: '#capabilities',
+        label: 'Engineering capabilities',
+        hint: 'Firmware, wireless, cloud and hardware, grouped.',
+      },
+      {
+        href: '#featured',
+        label: 'Featured system',
+        hint: 'The MYMO2 tracker, taken apart in longer form.',
+      },
+      {
+        href: '#impact',
+        label: 'Impact at a glance',
+        hint: 'Four focus areas and the evidence behind each.',
+      },
+    ],
+  },
+  {
+    id: 'about',
+    label: 'About',
+    href: '#about',
+    children: [
+      {
+        href: '#about',
+        label: 'Education & recognition',
+        hint: 'Degree, awards and selected credentials.',
+      },
+      {
+        href: '#philosophy',
+        label: 'Engineering philosophy',
+        hint: 'How I decide what is finished.',
+      },
+      {
+        href: '#top',
+        label: 'Back to the top',
+        hint: 'The opening statement and availability.',
+      },
+    ],
+  },
+  {
+    id: 'contact',
+    label: 'Contact',
+    href: '#contact',
+    children: [
+      {
+        href: '#contact',
+        label: 'Get in touch',
+        hint: 'Email, phone, and what I am open to.',
+      },
+      {
+        href: `mailto:${profile.email}`,
+        label: 'Email directly',
+        hint: 'Straight to my inbox.',
+        external: true,
+      },
+      {
+        href: profile.linkedin.url,
+        label: 'LinkedIn',
+        hint: 'Profile and professional history.',
+        external: true,
+      },
+      {
+        href: profile.github.url,
+        label: 'GitHub',
+        hint: 'Repositories and code.',
+        external: true,
+      },
+    ],
+  },
 ];
 
 export const contactLine = "Let's build something that has to work outside the demo.";

@@ -288,7 +288,7 @@ export function useInspectScroll(enabled: boolean, bandId: string) {
           trigger: band,
           start: 'top 85%',
           end: 'bottom 45%',
-          scrub: 0.18,
+          scrub: 0.9,
           onUpdate: () => (sceneState.explode = proxy.value),
         },
       });
@@ -366,7 +366,7 @@ export function useRangeScroll(
           trigger: band,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.16,
+          scrub: 0.7,
           onUpdate: write,
         },
       });

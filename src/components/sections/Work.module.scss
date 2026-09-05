@@ -7,6 +7,20 @@
 }
 .chapter {
   position: relative;
+  /* `clip`, not `hidden`: it clips without becoming a scroll container, and it
+     is the one overflow value that still pairs with `visible` on the other
+     axis — which matters, because the cyan pool below deliberately overflows
+     vertically and has to keep doing so.
+
+     What it stops is the text column's backdrop wash (`.text::before`,
+     inset -5rem sideways) reaching 80px past the page on each side. An
+     absolutely positioned child still counts toward its ancestors' scrollable
+     overflow even with `body { overflow-x: hidden }`, and on a phone Chrome
+     sizes the LAYOUT VIEWPORT to the document's overflow: measured on a 390px
+     device, this one pseudo-element was inflating the whole site's layout
+     viewport to 450px, so every page rendered about 15% smaller than it was
+     designed to. */
+  overflow-x: clip;
 }
 /* Thin chapter divider + a soft cyan pool behind alternating projects, so the
    run of chapters reads as separate rooms rather than one continuous scroll. */

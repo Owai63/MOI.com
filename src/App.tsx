@@ -31,12 +31,27 @@ function SkipLink() {
   );
 }
 
-/** Reset scroll to top on route change (except in-page hash nav). */
+/** Reset scroll to top on route change — and, when a link carried a hash,
+ *  land on the section it named.
+ *
+ *  The header submenus can now address any section from any route, so
+ *  '/#capabilities' arrives here as a route change WITH a hash. React Router
+ *  does not scroll to a hash on its own, and the target does not exist until
+ *  the homepage has painted, so the lookup is deferred by a frame. */
 function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
-    if (hash) return;
-    window.scrollTo(0, 0);
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    const id = decodeURIComponent(hash.slice(1));
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({ block: 'start' });
+      });
+    });
+    return () => cancelAnimationFrame(raf);
   }, [pathname, hash]);
   return null;
 }

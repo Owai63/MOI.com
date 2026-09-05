@@ -35,7 +35,7 @@
    ========================================================================== */
 
 import * as THREE from 'three';
-import { BENCH, STAGE, ROOM, laptopScreenPose } from './layout';
+import { BENCH, STAGE, ROOM } from './layout';
 import { DEVICES } from './devices/registry';
 import type { ProjectSlug } from '../../data/content';
 
@@ -184,7 +184,18 @@ const CLOSING: Shot = {
  *  and the shot is a cheek resting on the benchtop, too much and a flat board
  *  is seen from directly overhead and stops being an object at all. Around
  *  35 degrees is where both problems are smallest. */
-function matShot(subject: [number, number, number], swing: number, drop: number): Shot {
+function matShot(
+  subject: [number, number, number],
+  swing: number,
+  drop: number,
+  /* Standoff and lens. The tracker is an 86mm object and 0.46m at 30 degrees
+     is the framing that was tuned for it; the three rigs that joined it on
+     the mat are a 190mm rail, a 210mm tray and a camera looking at a card
+     across 120mm, and every one of them is out of frame at that standoff.
+     Left as defaults so the tracker's shot is byte-for-byte what it was. */
+  distance = 0.46,
+  fov = 30,
+): Shot {
   const aim = new THREE.Vector3(
     STAGE[0] + subject[0],
     STAGE[1] + subject[1],
@@ -193,42 +204,20 @@ function matShot(subject: [number, number, number], swing: number, drop: number)
   /* Approach direction: out toward the front of the bench (+z), swung round
      the subject so consecutive mat chapters are not the same photograph. */
   const dir = new THREE.Vector3(Math.sin(swing), drop, Math.cos(swing)).normalize();
-  const pos = aim.clone().addScaledVector(dir, 0.46);
+  const pos = aim.clone().addScaledVector(dir, distance);
   return {
     pos: [pos.x, pos.y, pos.z],
     look: [aim.x, aim.y, aim.z],
-    fov: 30,
-  };
-}
-
-/** Sitting down to the laptop. Taken off the panel's real transform rather
- *  than typed in — the panel is at the end of a chain of a group yaw, a hinge
- *  angle and a plane rotation, and any number written here by hand is wrong
- *  the first time the machine is nudged.
- *
- *  `swing` comes round the panel's normal so the three chapters that share
- *  this screen are not the same photograph three times — but it is kept SMALL,
- *  and the variety is carried by height and standoff instead.
- *
- *  The first pass swung the lifecycle chapter 38 degrees off the normal, on
- *  the reasoning that three identical shots would be dull. That was solving
- *  the wrong problem at the expense of the right one: what is on this screen
- *  is a data table, and a table read from 38 degrees off-axis is not a table,
- *  it is a texture. Any variety that costs legibility on a chapter whose
- *  entire subject is the screen is variety bought at the wrong price. */
-function laptopShot(swing: number, lift: number, distance: number, fov: number): Shot {
-  const { center, normal } = laptopScreenPose();
-  const dir = normal.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), swing).normalize();
-  const pos = center.clone().addScaledVector(dir, distance);
-  pos.y += lift;
-  return {
-    pos: [pos.x, pos.y, pos.z],
-    // below the panel centre, so the screen rides high and the hardware it is
-    // talking to shows underneath it
-    look: [center.x, center.y - 0.05, center.z],
     fov,
   };
 }
+
+/* The laptop shot went with the chapters that used it. Three chapters were
+   staged on that screen only because they had no object of their own; each
+   now has one on the mat, and a camera helper with no caller is a trap for
+   whoever reads this file next. layout.laptopScreenPose() is still there and
+   still used — Computers.tsx frames the panel with it.
+   ------------------------------------------------------------------------ */
 
 /** Standing out on the floor, facing a subject too big for the bench.
  *  Authored as a standpoint rather than derived from a standoff: this room is
@@ -273,11 +262,33 @@ const CHAPTER_SHOTS: Partial<Record<ProjectSlug, Shot>> = {
     fov: 53,
   },
 
-  /* Three reads of the same screen, varied by height and standoff rather than
-     by yaw. The middle one is the data table, so it gets the squarest look. */
-  'device-management': laptopShot(0.24, 0.13, 0.72, 29),
-  'lifecycle-database': laptopShot(-0.06, 0.17, 0.70, 28),
-  'violence-detection': laptopShot(0.34, 0.06, 0.76, 30),
+  /* These three used to be three reads of the same laptop screen, because
+     they had no object of their own to look at. They have one now (see
+     devices/OtaFleet, LifecycleBench and VisionRig), so they are shot on the
+     mat like the tracker — and each is framed for what its subject actually
+     is rather than for a panel they happened to share.
+
+     The consoles did not go away: each still runs on the monitor behind the
+     bench, so the chapter is the hardware AND the software talking to it in
+     one frame, instead of the software alone. */
+
+  /* Console, server, globe — three things on a line, with a packet arcing
+     over the top of them. Almost square on and deliberately flat: this is the
+     one chapter whose subject is a RELATIONSHIP between objects at bench
+     scale, so what has to survive is the left-to-right order and the height of
+     the arc. A three-quarter view foreshortens the line and puts the arc
+     edge-on, which is the one direction it carries no information in. */
+  'device-management': matShot([0, 0.072, 0], -0.14, 0.34, 0.76, 32),
+
+  // A staircase of five states. Nearly side-on, because the risers are the
+  // information: from above, five bays at five heights look like one tray.
+  'lifecycle-database': matShot([0, 0.03, 0], 0.34, 0.46, 0.46, 30),
+
+  // A camera and the chart it is pointed at. Swung most of the way round to
+  // the perpendicular of the sight line, so the two objects are side by side
+  // rather than one behind the other — the chart itself is angled to meet the
+  // standpoint (VisionRig.CARD_YAW), which is what makes that affordable.
+  'violence-detection': matShot([0, 0.05, 0], 0.45, 0.50, 0.44, 32),
 
   /* The chair, from the front left, standing. Far enough round that the office
      chair at the bench falls into the near edge of frame as a foreground

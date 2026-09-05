@@ -192,7 +192,7 @@ function CameraRig({ mode }: { mode: StageMode }) {
     /* --- motion. A tracking shot has to sit tighter on its mark than a room
        walk does, or the carriage slides around inside the frame every time the
        reader changes scroll speed. */
-    const omega = mode === 'range' ? 16 : mode === 'inspect' ? 14 : 10;
+    const omega = mode === 'range' ? 11 : mode === 'inspect' ? 9 : 6.4;
 
     if (sceneState.snap) {
       posSpring.snap(pose.pos);

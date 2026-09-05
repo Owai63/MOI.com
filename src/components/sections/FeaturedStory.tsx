@@ -20,7 +20,7 @@ export function FeaturedStory() {
   ];
 
   return (
-    <section className={styles.story} aria-labelledby="featured-title">
+    <section id="featured" className={styles.story} aria-labelledby="featured-title">
       <div className={`container ${styles.layout}`}>
         <Reveal className={styles.copy}>
           <span className={styles.eyebrow}>{f.eyebrow}{p.org}</span>

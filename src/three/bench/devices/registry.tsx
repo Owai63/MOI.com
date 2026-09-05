@@ -27,7 +27,9 @@ import type { ProgramId } from '../screens/programs';
 import { TrackerDevice } from './TrackerDevice';
 import { RangeFloorRig } from '../range/RangeFloorRig';
 import { Wheelchair } from './Wheelchair';
-import { DevRig, type RigVariant } from './DevRig';
+import { OtaLink } from './OtaLink';
+import { LifecycleBench } from './LifecycleBench';
+import { VisionRig } from './VisionRig';
 
 export type Waveform = 'serial' | 'pwm' | 'burst' | 'ramp' | 'noise' | 'pulse';
 
@@ -73,64 +75,6 @@ export interface DeviceEntry {
   screen?: { target: 'laptop' | 'monitor'; program: ProgramId };
   wave: Waveform;
   accent: string;
-}
-
-/* The chapters whose hardware was a development setup rather than a product.
-   See the note at the top of DevRig.tsx on why these stay generic. */
-const RIGS: Record<string, RigVariant> = {
-  'device-management': {
-    id: 'rig-otap',
-    seed: 4401,
-    w: 0.085,
-    d: 0.062,
-    mask: '#123c5e',
-    led: '#3fe0d0',
-    radio: true,
-    module: 'radio',
-  },
-  'lifecycle-database': {
-    id: 'rig-lifecycle',
-    seed: 5522,
-    w: 0.078,
-    d: 0.058,
-    mask: '#1c1f4a',
-    led: '#8f7bf0',
-    radio: false,
-    module: 'display',
-  },
-  'violence-detection': {
-    id: 'rig-vision',
-    seed: 6633,
-    w: 0.092,
-    d: 0.066,
-    mask: '#3a1330',
-    led: '#f6a250',
-    radio: false,
-    module: 'sensor',
-  },
-};
-
-/** A software chapter: the console on the laptop is the subject, with the
- *  bench rig it talks to sitting alongside in the foreground. */
-function softwareEntry(
-  slug: ProjectSlug,
-  accent: string,
-  wave: Waveform,
-  program: ProgramId,
-): DeviceEntry {
-  const variant = RIGS[slug];
-  return {
-    slug,
-    render: (props) => <DevRig variant={variant} {...props} />,
-    stageKind: 'laptop',
-    stage: { position: [0, 0, 0], rotation: [0, -0.62, 0], scale: 1 },
-    inspect: { position: [0, 0, 0], rotation: [0, -0.5, 0], scale: 3.1 },
-    distance: 0.40,
-    lookHeight: 0.02,
-    screen: { target: 'laptop', program },
-    wave,
-    accent,
-  };
 }
 
 export const DEVICES: DeviceEntry[] = [
@@ -180,9 +124,56 @@ export const DEVICES: DeviceEntry[] = [
     wave: 'pwm',
     accent: '#f6a250',
   },
-  softwareEntry('device-management', '#3fe0d0', 'burst', 'ota'),
-  softwareEntry('lifecycle-database', '#8f7bf0', 'ramp', 'lifecycle'),
-  softwareEntry('violence-detection', '#f6a250', 'noise', 'vision'),
+  {
+    slug: 'device-management',
+    /* Console, server, and a globe with the unit standing on it — the whole
+       path a configuration takes from a web form to a tracker that is not in
+       the building. See OtaLink.tsx. */
+    render: (props) => <OtaLink {...props} />,
+    stageKind: 'mat',
+    /* Barely yawed. The set is a LINE, read left to right, and turning it far
+       enough to be "dynamic" is turning it far enough that the far end of the
+       line is behind the near end. */
+    stage: { position: [0, 0, -0.01], rotation: [0, -0.16, 0], scale: 1 },
+    inspect: { position: [0, -0.06, 0], rotation: [0, -0.22, 0], scale: 1.05 },
+    // a 310mm set standing 190mm tall, so the camera stands well back — much
+    // further than the 86mm tracker's shot
+    distance: 0.66,
+    lookHeight: 0.062,
+    // the rollout console runs on the monitor behind it as well
+    screen: { target: 'monitor', program: 'ota' },
+    wave: 'burst',
+    accent: '#3fe0d0',
+  },
+  {
+    slug: 'lifecycle-database',
+    /* One device, five times over, on a stepped tray. See LifecycleBench.tsx
+       for why a database is staged as the thing it keeps records about. */
+    render: (props) => <LifecycleBench {...props} />,
+    stageKind: 'mat',
+    stage: { position: [0, 0, 0], rotation: [0, -0.24, 0], scale: 1 },
+    inspect: { position: [0, -0.012, 0], rotation: [0, -0.30, 0], scale: 1.5 },
+    distance: 0.54,
+    lookHeight: 0.028,
+    screen: { target: 'monitor', program: 'lifecycle' },
+    wave: 'ramp',
+    accent: '#8f7bf0',
+  },
+  {
+    slug: 'violence-detection',
+    /* A bench camera and the chart it is aimed at. Yawed most of a quarter
+       turn so the printed target faces the reader while the camera stays in
+       three-quarter view — the sight line between them is the composition. */
+    render: (props) => <VisionRig {...props} />,
+    stageKind: 'mat',
+    stage: { position: [0.01, 0, 0], rotation: [0, 0.95, 0], scale: 1 },
+    inspect: { position: [0, -0.03, 0], rotation: [0, 0.62, 0], scale: 1.9 },
+    distance: 0.46,
+    lookHeight: 0.052,
+    screen: { target: 'monitor', program: 'vision' },
+    wave: 'noise',
+    accent: '#f6a250',
+  },
   {
     slug: 'wheelchair',
     render: (props) => <Wheelchair {...props} />,

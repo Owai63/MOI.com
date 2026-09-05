@@ -10,6 +10,15 @@
 
 export interface Copy {
   hero: { viewWork: string; contact: string; scroll: string };
+  /** Labels the header submenus and the hero's chapter index share. */
+  nav: {
+    home: string;
+    allProjects: string;
+    allProjectsHint: string;
+    exploreEyebrow: string;
+    exploreTitle: string;
+    exploreAllHint: string;
+  };
   impact: { eyebrow: string; focus: string; evidence: string };
   interlude: { open: string; close: string };
   work: {
@@ -31,6 +40,9 @@ export interface Copy {
     title: string;
     intro: string;
     back: string;
+    featuredLabel: string;
+    countLabel: string;
+    empty: string;
     filterAll: string;
     filterProduction: string;
     filterAcademic: string;
@@ -71,6 +83,10 @@ export interface Copy {
   footer: { backToTop: string };
   caseStudy: {
     allWork: string;
+    backToIndex: string;
+    nextProject: string;
+    prevProject: string;
+    keepReading: string;
     role: string;
     context: string;
     status: string;
@@ -95,6 +111,14 @@ export interface Copy {
 
 export const copyEn: Copy = {
   hero: { viewWork: 'View Selected Work', contact: 'Contact', scroll: 'Scroll' },
+  nav: {
+    home: 'Home',
+    allProjects: 'All projects',
+    allProjectsHint: 'Every build — production, freelance and academic.',
+    exploreEyebrow: 'Start anywhere',
+    exploreTitle: 'Jump to a chapter',
+    exploreAllHint: 'The complete index, with filters.',
+  },
   impact: { eyebrow: 'Engineering impact', focus: 'Focus', evidence: 'Evidence' },
   interlude: { open: 'Selected Systems', close: 'Outside the demo' },
   work: {
@@ -117,6 +141,9 @@ export const copyEn: Copy = {
     intro:
       'The complete catalogue — production systems, freelance builds, and academic projects — each with its own case study.',
     back: '← Back to home',
+    featuredLabel: 'Featured',
+    countLabel: 'Showing',
+    empty: 'No projects in this group.',
     filterAll: 'All',
     filterProduction: 'Production',
     filterAcademic: 'Academic',
@@ -176,7 +203,11 @@ export const copyEn: Copy = {
   },
   footer: { backToTop: 'Back to top ↑' },
   caseStudy: {
-    allWork: '← All work',
+    allWork: 'All projects',
+    backToIndex: 'Back to all projects',
+    nextProject: 'Next project',
+    prevProject: 'Previous project',
+    keepReading: 'Keep reading',
     role: 'Role',
     context: 'Context',
     status: 'Status',

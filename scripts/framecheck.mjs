@@ -34,7 +34,32 @@ const { DEVICES } = await server.ssrLoadModule('/src/three/bench/devices/registr
 const { LAB_LANE_YAW } = await server.ssrLoadModule('/src/three/bench/range/RangeFloorRig.tsx');
 const { LAB_RAIL_LEN } = await server.ssrLoadModule('/src/three/bench/range/spec.ts');
 
-const { ROOM, BENCH, MONITORS, laptopScreenPose } = layout;
+const { ROOM, BENCH, MONITORS, STAGE, LAPTOP_BENCH_SPOT, laptopScreenPose } = layout;
+
+/* A point in one bench device's LOCAL space, in world space.
+   Three chapters are now staged on the mat with their own geometry, and each
+   of them is wider than the tracker the mat framing was tuned for — a rail of
+   six units, a tray of five, a camera and the card it is aimed at. Asking
+   "is the cutting mat in frame" says nothing useful about any of those, so
+   the marks are taken off the registry's own stage transform instead of
+   being typed in: move a device in registry.tsx and this check moves with
+   it. */
+function deviceMark(slug, local) {
+  const d = DEVICES.find((x) => x.slug === slug);
+  if (!d) throw new Error(`no device for ${slug}`);
+  const origin =
+    d.stageKind === 'room' ? ROOM.stage : d.stageKind === 'laptop' ? LAPTOP_BENCH_SPOT : STAGE;
+  const g = new THREE.Object3D();
+  g.position.set(
+    origin[0] + d.stage.position[0],
+    origin[1] + d.stage.position[1],
+    origin[2] + d.stage.position[2],
+  );
+  g.rotation.set(...d.stage.rotation);
+  g.scale.setScalar(d.stage.scale);
+  g.updateMatrixWorld(true);
+  return new THREE.Vector3(...local).applyMatrix4(g.matrixWorld);
+}
 
 /* --- the landmarks worth asking about ------------------------------------ */
 
@@ -49,6 +74,22 @@ const MARKS = {
   'laptop screen R': panel.clone().add(new THREE.Vector3(0.14, 0, 0.06)),
   monitors: new THREE.Vector3(MONITORS.position[0], 0.27, MONITORS.position[2]),
   'cutting mat': new THREE.Vector3(-0.12, 0.02, 0.09),
+
+  // the OTA set: the console at one end of the line, the globe at the other,
+  // the unit standing on it, and the top of the arc between them
+  'ota console': deviceMark('device-management', [-0.122, 0.038, 0]),
+  'ota server': deviceMark('device-management', [-0.02, 0.03, 0]),
+  'ota globe': deviceMark('device-management', [0.1, 0.149, 0]),
+  'ota unit': deviceMark('device-management', [0.114, 0.118, 0.065]),
+  'ota arc apex': deviceMark('device-management', [0.04, 0.185, 0.035]),
+
+  // the lifecycle tray: the first and last of the five states
+  'lifecycle 01': deviceMark('lifecycle-database', [-0.084, 0.006, 0]),
+  'lifecycle 05': deviceMark('lifecycle-database', [0.084, 0.046, 0]),
+
+  // the detection rig: the camera and the chart it is pointed at
+  'vision camera': deviceMark('violence-detection', [-0.052, 0.086, 0]),
+  'vision chart': deviceMark('violence-detection', [0.062, 0.052, 0]),
   'track near': laneCentre.clone().addScaledVector(laneDir, -laneHalf),
   'track far': laneCentre.clone().addScaledVector(laneDir, laneHalf),
   wheelchair: new THREE.Vector3(ROOM.stage[0], BENCH.floorY + 0.55, ROOM.stage[2]),
@@ -61,9 +102,9 @@ const SUBJECTS = {
   0: ['bench left', 'bench right', 'monitors'],
   1: ['cutting mat'],
   2: ['track near', 'track far', 'laptop screen'],
-  3: ['laptop screen L', 'laptop screen R'],
-  4: ['laptop screen L', 'laptop screen R'],
-  5: ['laptop screen L', 'laptop screen R'],
+  3: ['ota console', 'ota server', 'ota globe', 'ota unit', 'ota arc apex'],
+  4: ['lifecycle 01', 'lifecycle 05'],
+  5: ['vision camera', 'vision chart'],
   6: ['wheelchair'],
   7: ['bench left', 'bench right'],
 };

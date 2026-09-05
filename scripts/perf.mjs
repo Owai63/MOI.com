@@ -296,7 +296,7 @@ try {
   const positions = [
     ['hero (station 0)', 0],
     ['first work chapter', 1],
-    ['laptop chapters', 3],
+    ['ota fleet chapter', 3],
     ['room chapter', 6],
   ];
 

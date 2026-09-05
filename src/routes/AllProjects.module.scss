@@ -2,45 +2,8 @@
 
 .page {
   min-height: 100vh;
+  padding-top: var(--header-h);
   background: var(--bg);
-}
-
-.bar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  height: var(--header-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline: $gutter;
-  background: rgba(5, 7, 10, 0.8);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line-soft);
-}
-.home {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-display);
-  font-weight: 600;
-}
-.mark {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  background: var(--cyan);
-}
-.back {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  &:hover {
-    color: var(--cyan-bright);
-  }
 }
 
 /* hero / heading */
@@ -78,6 +41,21 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
+}
+/* How much of the catalogue the current group is. Live-announced, so a filter
+   press is not a silent change for a screen-reader user. */
+.count {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.empty {
+  grid-column: 1 / -1;
+  padding: 3rem 0;
+  color: var(--text-mute);
 }
 .filterBtn {
   display: inline-flex;
@@ -150,6 +128,23 @@
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--cyan);
+}
+.cardTags {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+/* Which of the thirteen are the six the homepage stages in full. */
+.featTag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 3px;
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  background: var(--cyan-glow);
 }
 .catTag {
   font-family: var(--font-mono);

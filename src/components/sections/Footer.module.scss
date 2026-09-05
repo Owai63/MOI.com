@@ -1,11 +1,88 @@
 @use '../../styles/tokens' as *;
 
 .footer {
+  /* Lifted above the bench canvas, which is `position: fixed; z-index: 1` and
+     renders with alpha:false — an opaque full-viewport layer. Anything left in
+     the static flow paints UNDER it, which is where the footer has been all
+     along: present in the DOM, 100% covered on screen. Home's content blocks
+     (Home.module.scss .surface / .openStage) already lift themselves for the
+     same reason; the footer never did. */
+  position: relative;
+  z-index: 3;
   border-top: 1px solid var(--line);
-  padding-block: 2.4rem;
   background: #04060a;
 }
+
+/* --- sitemap --------------------------------------------------------------
+   Four columns at desktop, two on a tablet, one on a phone. The Work column
+   is the tall one; letting it set the row height and the others sit short is
+   correct — the alternative is padding three columns to match a list nobody
+   asked to be as long. */
+.map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 2rem clamp(1.5rem, 4vw, 3rem);
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  border-bottom: 1px solid var(--line-soft);
+}
+.column {
+  min-width: 0;
+}
+.columnTitle {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+.columnLink {
+  color: inherit;
+  &:hover {
+    color: var(--cyan-bright);
+  }
+}
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+}
+.link,
+.linkStrong {
+  display: inline-block;
+  padding-block: 0.35rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--text-mute);
+  transition: color 0.25s ease;
+  &:hover {
+    color: var(--text);
+  }
+}
+.linkStrong {
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  &:hover {
+    color: var(--cyan-bright);
+  }
+}
+.ext {
+  display: inline-block;
+  margin-inline-start: 0.3rem;
+  font-size: 0.75em;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
 .inner {
+  padding-block: 2.4rem;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 2rem;

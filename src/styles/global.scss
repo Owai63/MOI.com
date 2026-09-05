@@ -181,6 +181,13 @@ h3 {
   padding-block: clamp(5rem, 12vh, 10rem);
 }
 
+/* Every addressable landmark clears the fixed header. The submenus can now
+   deep-link to any section from anywhere on the site, and without this the
+   first line of whatever you asked for arrives behind the bar. */
+:where(section, aside, div, article)[id] {
+  scroll-margin-top: calc(var(--header-h) + 1.25rem);
+}
+
 /* ---------------------------------------------------------------------------
    SECTION SURFACES — rhythm without leaving the dark engineering palette.
    Because almost everything sits on the same near-black, consecutive sections
@@ -332,6 +339,14 @@ html[dir='rtl'] [data-latin] {
   &:focus {
     transform: translateY(0);
   }
+}
+
+/* The assistant steps aside for the mobile menu. Both are fixed overlays and
+   the assistant is the higher of the two, so without this its button covers
+   the drawer's last submenu toggle — and a control you cannot reach is worse
+   than one that is not there. */
+body[data-nav-open='true'] [data-chat-widget] {
+  display: none;
 }
 
 /* Grain / atmosphere layer helper (procedural, no raster).

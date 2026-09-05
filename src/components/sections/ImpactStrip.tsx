@@ -13,7 +13,7 @@ export function ImpactStrip() {
   const copy = useCopy();
 
   return (
-    <section className={styles.strip} aria-labelledby="impact-title">
+    <section id="impact" className={styles.strip} aria-labelledby="impact-title">
       <div className="container">
         <div className={styles.head}>
           <h2 id="impact-title" className="eyebrow">

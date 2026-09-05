@@ -2,6 +2,7 @@
 
 .page {
   min-height: 100vh;
+  padding-top: var(--header-h);
   background: var(--bg);
 }
 
@@ -213,48 +214,17 @@
   padding-top: clamp(2rem, 5vw, 4rem);
 }
 
-.bar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  height: var(--header-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline: $gutter;
-  background: rgba(5, 7, 10, 0.8);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line-soft);
-}
-.home {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-display);
-  font-weight: 600;
-}
-.mark {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  background: var(--cyan);
-}
-.back {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  &:hover {
-    color: var(--cyan-bright);
-  }
-}
-
 /* hero */
 .hero {
   padding-top: clamp(3rem, 8vw, 6rem);
   padding-bottom: clamp(2rem, 5vw, 4rem);
+  /* Same reason as Work.module.scss `.chapter`: the title block's backdrop
+     wash is inset -10rem sideways, and an absolutely positioned child counts
+     toward the document's scrollable overflow whatever `body` clips. On a
+     390px phone that pushed the layout viewport to 551px, so every case study
+     with a modelled device rendered at about 70% of its intended size. `clip`
+     keeps the wash and stops it dragging the page wider. */
+  overflow-x: clip;
 }
 .heroTop {
   display: flex;
@@ -444,6 +414,87 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cyan-bright);
+}
+
+/* ---------------------------------------------------------------------------
+   PAGER — the end of the page is a junction, not a dead end.
+   Back to the index on the left, the two neighbouring case studies on the
+   right, all three named rather than left as arrows.
+   --------------------------------------------------------------------------- */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 1rem;
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  border-top: 1px solid var(--line);
+}
+.pagerIndex {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--surface);
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  &:hover {
+    color: var(--text);
+    border-color: var(--cyan-dim);
+    background: var(--surface-2);
+  }
+}
+.pagerPair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  flex: 1;
+  min-width: min(100%, 20rem);
+  margin-inline-start: auto;
+}
+.pagerLink {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s $ease-out;
+  &:hover {
+    border-color: var(--cyan-dim);
+    background: var(--surface-2);
+    transform: translateY(-2px);
+  }
+}
+/* The forward direction is the one most readers take, so it is the one that
+   reads as the primary of the pair — and it aligns to the end of the row, in
+   whichever direction the page is being read. */
+.pagerNext {
+  text-align: end;
+  border-color: var(--cyan-dim);
+}
+.pagerKind {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.pagerName {
+  font-size: 0.98rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+@include reduced-motion {
+  .pagerLink:hover {
+    transform: none;
+  }
 }
 
 .activeStatus {

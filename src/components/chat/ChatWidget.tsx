@@ -86,7 +86,11 @@ export function ChatWidget() {
 
   return (
     <>
+      {/* Tagged so the header can hide the assistant while the mobile drawer
+          is open: the widget sits at z-index 200, above the drawer, and its
+          button lands exactly on the drawer's last submenu toggle. */}
       <button
+        data-chat-widget=""
         type="button"
         className={`${styles.fab} ${open ? styles.fabOpen : ''}`}
         aria-label={open ? ui.chatClose : ui.chatOpen}
@@ -114,6 +118,7 @@ export function ChatWidget() {
       </button>
 
       <section
+        data-chat-widget=""
         className={`${styles.panel} ${open ? styles.panelOpen : ''}`}
         role="dialog"
         aria-label={ui.chatTitle}

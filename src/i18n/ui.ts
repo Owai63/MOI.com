@@ -40,6 +40,12 @@ export interface UiStrings {
   navHome: string;
   navPrimary: string;
   navMobile: string;
+  /** Template — {subject} is the top-level destination the menu belongs to. */
+  navSubmenuOf: string;
+  navNewTab: string;
+  navShortcuts: string;
+  navSitemap: string;
+  navProjectPager: string;
   menuOpen: string;
   menuClose: string;
   heroLandmark: string;
@@ -97,6 +103,11 @@ export const uiEn: UiStrings = {
   navHome: 'Home — Muhammad Owais Iqbal',
   navPrimary: 'Primary',
   navMobile: 'Mobile',
+  navSubmenuOf: '{subject} submenu',
+  navNewTab: 'opens in a new tab',
+  navShortcuts: 'Chapter shortcuts',
+  navSitemap: 'Sitemap',
+  navProjectPager: 'Project navigation',
   menuOpen: 'Open menu',
   menuClose: 'Close menu',
   heroLandmark: 'Introduction',

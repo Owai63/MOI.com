@@ -149,6 +149,151 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   HERO SUBMENU — the page as a numbered contents list.
+   A row of destinations rather than a wall: the number carries the order, the
+   name carries the destination, and the hint answers "is what I want in
+   there?" before the reader commits to a scroll. On a phone the hints go and
+   it collapses to a scroll-snapped strip of chips, which is the one shape
+   that survives a 100svh hero with a display headline in it.
+   --------------------------------------------------------------------------- */
+.explore {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  /* Both of these matter. The hero is a grid, and a grid item's automatic
+     minimum size is its min-content width — so without `min-width: 0` the
+     widest thing inside this strip sets a floor the whole page has to be as
+     wide as, and a phone's layout viewport silently inflates to fit it. */
+  min-width: 0;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--line);
+  animation: rise 1s $ease-out 1.15s backwards;
+}
+.exploreLabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.exploreList {
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(11rem, 1fr);
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.exploreItem {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  height: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s $ease-out;
+  &:hover,
+  &:focus-visible {
+    border-color: var(--cyan-dim);
+    background: var(--surface-2);
+    transform: translateY(-2px);
+  }
+}
+.exploreNum {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--cyan-dim);
+  flex-shrink: 0;
+}
+.exploreText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.exploreName {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.exploreCount {
+  font-style: normal;
+  font-size: 0.66rem;
+  line-height: 1;
+  padding: 0.18rem 0.34rem;
+  border-radius: 999px;
+  background: var(--cyan-glow);
+  color: var(--cyan);
+}
+.exploreHint {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-mute);
+}
+.exploreAll {
+  border-color: var(--cyan-dim);
+}
+
+@include down($bp-desktop) {
+  .exploreHint {
+    display: none;
+  }
+}
+@include down($bp-tablet) {
+  /* A scroll-snapped strip. The row would otherwise squeeze five columns into
+     a phone's width and make every one of them unreadable.
+
+     Flex, not grid, and deliberately: a grid with max-content tracks reports
+     the SUM of those tracks as its min-content width even inside a scroll
+     container, so it drags the page wider instead of scrolling within it. A
+     flex row with `min-width: 0` scrolls its own overflow and contributes
+     nothing to the page's width. */
+  .exploreList {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 0.3rem;
+    /* No full-bleed negative margin. Snapping aligns the first chip's edge
+       with the scrollport's, which ate the leading padding and left the strip
+       starting a gutter to the left of every other line in the hero. Starting
+       at the gutter and letting the last chip run off the right is the same
+       "there is more" signal without the misalignment. */
+    padding-inline-end: 1rem;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    > li {
+      flex: 0 0 auto;
+    }
+  }
+  .exploreItem {
+    scroll-snap-align: start;
+    min-height: 44px;
+    align-items: center;
+  }
+}
+@include reduced-motion {
+  .explore {
+    animation: none;
+  }
+  .exploreItem:hover {
+    transform: none;
+  }
+}
+
 /* footer row */
 .foot {
   display: flex;

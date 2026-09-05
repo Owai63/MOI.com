@@ -799,6 +799,240 @@ export function rangeMarkerTexture(label: string) {
   });
 }
 
+/* ============================================================================
+   OTA — the world the fleet is out in, and the console it is driven from
+   ==========================================================================*/
+
+/** Coarse continent outlines in degrees, [lon, lat]. Deliberately low
+ *  fidelity: this is a schematic globe on a workbench, drawn at about 100mm
+ *  across, and a detailed coastline at that size is noise. What it has to say
+ *  is "this is the Earth, and the unit is somewhere on it". */
+const LANDMASSES: [number, number][][] = [
+  // North America
+  [[-168, 65], [-140, 70], [-120, 70], [-95, 72], [-80, 70], [-60, 60], [-55, 50],
+   [-65, 45], [-75, 35], [-81, 25], [-97, 18], [-105, 20], [-115, 30], [-125, 40],
+   [-125, 48], [-135, 58], [-155, 58]],
+  // Greenland
+  [[-45, 60], [-20, 70], [-20, 82], [-45, 83], [-60, 80], [-55, 70]],
+  // South America
+  [[-81, 8], [-70, 12], [-60, 10], [-50, 0], [-35, -5], [-38, -15], [-48, -25],
+   [-58, -35], [-65, -45], [-70, -55], [-75, -50], [-72, -35], [-70, -20], [-75, -10],
+   [-81, 0]],
+  // Africa
+  [[-17, 15], [0, 17], [12, 32], [20, 32], [32, 31], [35, 22], [43, 12], [51, 12],
+   [42, -2], [40, -15], [35, -25], [25, -34], [18, -34], [12, -18], [9, -2], [8, 4],
+   [-8, 5]],
+  // Europe + Asia
+  [[-10, 36], [0, 44], [10, 45], [18, 40], [28, 41], [40, 40], [48, 30], [56, 25],
+   [62, 25], [68, 23], [78, 8], [80, 15], [90, 22], [95, 15], [102, 13], [107, 10],
+   [110, 20], [120, 22], [122, 31], [127, 38], [132, 44], [138, 52], [148, 60],
+   [162, 62], [172, 66], [180, 68], [140, 75], [100, 78], [75, 73], [60, 70],
+   [40, 68], [28, 65], [24, 60], [10, 58], [5, 60], [-5, 50], [-10, 43]],
+  // Australia
+  [[113, -22], [122, -18], [130, -12], [140, -12], [145, -16], [150, -25], [153, -28],
+   [150, -37], [140, -38], [130, -32], [118, -35], [113, -26]],
+];
+
+/** The globe's surface map, equirectangular. Ocean, coarse land, a graticule,
+ *  and nothing that pretends to be data. */
+export function worldTexture() {
+  return cached('world', () => {
+    const W = 2048;
+    const H = 1024;
+    const { canvas, ctx } = surface(W, H);
+    const px = (lon: number) => ((lon + 180) / 360) * W;
+    const py = (lat: number) => ((90 - lat) / 180) * H;
+
+    // ocean
+    const sea = ctx.createLinearGradient(0, 0, 0, H);
+    sea.addColorStop(0, '#0a1620');
+    sea.addColorStop(0.5, '#0d2230');
+    sea.addColorStop(1, '#0a1620');
+    ctx.fillStyle = sea;
+    ctx.fillRect(0, 0, W, H);
+
+    // graticule, every 15°
+    ctx.strokeStyle = 'rgba(63,224,208,0.10)';
+    ctx.lineWidth = 2;
+    for (let lon = -180; lon <= 180; lon += 15) {
+      ctx.beginPath();
+      ctx.moveTo(px(lon), 0);
+      ctx.lineTo(px(lon), H);
+      ctx.stroke();
+    }
+    for (let lat = -75; lat <= 75; lat += 15) {
+      ctx.beginPath();
+      ctx.moveTo(0, py(lat));
+      ctx.lineTo(W, py(lat));
+      ctx.stroke();
+    }
+    // equator, marked
+    ctx.strokeStyle = 'rgba(63,224,208,0.26)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, py(0));
+    ctx.lineTo(W, py(0));
+    ctx.stroke();
+
+    // land
+    for (const poly of LANDMASSES) {
+      ctx.beginPath();
+      poly.forEach(([lon, lat], i) => {
+        const x = px(lon);
+        const y = py(lat);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#1d2b33';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(120,200,210,0.5)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    // polar caps, so the poles are not bare ocean
+    ctx.fillStyle = '#1d2b33';
+    ctx.fillRect(0, 0, W, py(80));
+    ctx.fillRect(0, py(-72), W, H - py(-72));
+
+    return finish(canvas, { aniso: 8 });
+  });
+}
+
+/** The web console the configuration is pushed from. A form, not a dashboard:
+ *  what this platform does is take a setting from an operator and land it on
+ *  a unit that is not in the building. */
+export function otaConsoleTexture() {
+  return cached('ota-console', () => {
+    const W = 512;
+    const H = 340;
+    const { canvas, ctx } = surface(W, H);
+    ctx.fillStyle = '#070b10';
+    ctx.fillRect(0, 0, W, H);
+
+    // title bar
+    ctx.fillStyle = '#0d151d';
+    ctx.fillRect(0, 0, W, 40);
+    ctx.fillStyle = '#3fe0d0';
+    ctx.beginPath();
+    ctx.arc(22, 20, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#e6edf3';
+    ctx.font = '600 19px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('Device configuration', 40, 27);
+    ctx.fillStyle = 'rgba(203,216,227,0.45)';
+    ctx.font = '500 15px "SF Mono", Menlo, Consolas, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('fleet · 1 selected', W - 20, 27);
+    ctx.textAlign = 'left';
+
+    // the selected unit
+    ctx.fillStyle = 'rgba(63,224,208,0.08)';
+    ctx.fillRect(20, 56, W - 40, 42);
+    ctx.strokeStyle = 'rgba(63,224,208,0.4)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(20.5, 56.5, W - 41, 41);
+    ctx.fillStyle = '#3fe0d0';
+    ctx.font = '500 16px "SF Mono", Menlo, Consolas, monospace';
+    ctx.fillText('MYMO2-0447', 34, 74);
+    ctx.fillStyle = 'rgba(203,216,227,0.45)';
+    ctx.font = '500 13px "SF Mono", Menlo, Consolas, monospace';
+    ctx.fillText('last seen 4 min ago', 34, 90);
+
+    // the fields being set
+    const rows: [string, string][] = [
+      ['reporting interval', '60 s'],
+      ['geofence radius', '250 m'],
+      ['motion threshold', '0.35 g'],
+      ['firmware channel', 'stable'],
+    ];
+    rows.forEach(([k, v], i) => {
+      const y = 122 + i * 34;
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.fillRect(20, y, W - 40, 26);
+      ctx.fillStyle = 'rgba(203,216,227,0.55)';
+      ctx.font = '500 14px "SF Mono", Menlo, Consolas, monospace';
+      ctx.fillText(k, 34, y + 18);
+      ctx.fillStyle = '#e6edf3';
+      ctx.textAlign = 'right';
+      ctx.fillText(v, W - 34, y + 18);
+      ctx.textAlign = 'left';
+    });
+
+    // the button. Drawn dark here; the lit state is a separate emissive quad
+    // in the scene, so it can pulse when a push actually leaves.
+    ctx.fillStyle = '#0d1c22';
+    ctx.fillRect(20, 274, W - 40, 44);
+    ctx.strokeStyle = 'rgba(63,224,208,0.55)';
+    ctx.strokeRect(20.5, 274.5, W - 41, 43);
+    ctx.fillStyle = '#3fe0d0';
+    ctx.font = '600 17px "SF Mono", Menlo, Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PUSH CONFIGURATION', W / 2, 302);
+    ctx.textAlign = 'left';
+
+    return finish(canvas, { aniso: 8 });
+  });
+}
+
+/** The printed chart a bench camera is aimed at while a detection model is
+ *  being exercised. Deliberately a CALIBRATION TARGET and not a scene: a
+ *  rendered crowd would be a fabricated dataset, and a chart is what actually
+ *  sits in front of a camera on a desk. The two darker patches are what the
+ *  tracking brackets in VisionRig travel between. */
+export function visionTargetTexture() {
+  return cached('vision-target', () => {
+    const { canvas, ctx } = surface(512, 360);
+    const rnd = prng(9091);
+
+    // card stock, very slightly uneven
+    ctx.fillStyle = '#c8ccc6';
+    ctx.fillRect(0, 0, 512, 360);
+    for (let i = 0; i < 4000; i++) {
+      ctx.fillStyle = `rgba(90,96,100,${rnd() * 0.05})`;
+      ctx.fillRect(rnd() * 512, rnd() * 360, 2, 2);
+    }
+
+    // registration grid
+    ctx.strokeStyle = 'rgba(28,32,38,0.28)';
+    ctx.lineWidth = 1;
+    for (let x = 32; x < 512; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 24);
+      ctx.lineTo(x, 336);
+      ctx.stroke();
+    }
+    for (let y = 24; y < 360; y += 32) {
+      ctx.beginPath();
+      ctx.moveTo(32, y);
+      ctx.lineTo(480, y);
+      ctx.stroke();
+    }
+
+    // corner fiducials
+    ctx.fillStyle = '#1a1f25';
+    for (const [x, y] of [[32, 24], [480, 24], [32, 336], [480, 336]] as const) {
+      ctx.fillRect(x - 9, y - 9, 18, 18);
+      ctx.clearRect(x - 4, y - 4, 8, 8);
+    }
+
+    // the two regions of interest
+    ctx.fillStyle = 'rgba(30,36,44,0.55)';
+    ctx.fillRect(112, 96, 96, 168);
+    ctx.fillStyle = 'rgba(30,36,44,0.42)';
+    ctx.fillRect(288, 128, 88, 136);
+
+    ctx.strokeStyle = '#1a1f25';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(16, 12, 480, 336);
+
+    ctx.fillStyle = '#2a3038';
+    ctx.font = '600 20px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('TEST TARGET', 34, 350);
+    return finish(canvas, { aniso: 8 });
+  });
+}
+
 /** Seven-segment readout on a bench instrument. Drawn as real segments rather
  *  than as text, because the give-away on a fake instrument is digits that are
  *  the wrong shape — a seven-segment 4 has an open top, and a proportional

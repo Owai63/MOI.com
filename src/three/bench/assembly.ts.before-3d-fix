@@ -113,7 +113,7 @@ export function useAssembly(
     const targetBuild = solo ? 1 : sceneState.build * active;
     live.current = sceneState.snap
       ? targetBuild
-      : THREE.MathUtils.damp(live.current, targetBuild, 7.5, d);
+      : THREE.MathUtils.damp(live.current, targetBuild, 3.2, d);
 
     const build = live.current;
     const explode = solo ? sceneState.explode : 0;
@@ -153,20 +153,12 @@ export function useAssembly(
 /** Walk a part and set opacity on its materials. Materials are shared between
  *  parts, so this writes the *maximum* requested opacity per frame and lets
  *  the last writer win — acceptable because only one device fades at a time. */
-const lastOpacity = new WeakMap<THREE.Object3D, number>();
-
 function applyOpacity(root: THREE.Object3D, opacity: number) {
-  // Avoid traversing a part's entire subtree every frame when its visual
-  // opacity has not meaningfully changed.
-  const next = opacity >= 0.999 ? 1 : Math.round(opacity * 100) / 100;
-  if (lastOpacity.get(root) === next) return;
-  lastOpacity.set(root, next);
-
-  if (next === 1) {
+  if (opacity >= 0.999) {
     root.traverse(setOpaque);
     return;
   }
-  fadeTarget = next;
+  fadeTarget = opacity;
   root.traverse(setFaded);
 }
 

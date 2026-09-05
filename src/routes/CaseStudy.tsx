@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useContent, useCopy } from '../i18n/useContent';
+import { useContent, useCopy, useUi } from '../i18n/useContent';
+import { Nav } from '../components/Nav';
+import { Footer } from '../components/sections/Footer';
 import { ProjectVisual } from '../components/visuals/ProjectVisual';
 import { TagList } from '../components/ui/TagList';
 import { BenchStage } from '../three/BenchStage';
@@ -18,10 +20,18 @@ const RANGE_BAND = 'range-band';
 const RANGE_SLUG = 'shooting-range';
 
 export function CaseStudy() {
-  const { getProject, profile, isActive } = useContent();
+  const { getProject, projects, profile, isActive } = useContent();
   const copy = useCopy();
+  const ui = useUi();
   const { slug } = useParams();
   const project = getProject(slug ?? '');
+
+  /* Where this case study sits in the catalogue, so the foot of the page can
+     offer the one either side of it. A reader who finished this one is far
+     more likely to want the next project than the homepage. */
+  const at = projects.findIndex((p) => p.slug === slug);
+  const prev = at > 0 ? projects[at - 1] : null;
+  const next = at >= 0 && at < projects.length - 1 ? projects[at + 1] : null;
 
   /* Projects with a modelled device get the live inspection stage; the rest
      keep their illustrative image. `deviceFor` is the single source of truth
@@ -51,15 +61,11 @@ export function CaseStudy() {
   return (
     <div className={`${styles.page} ${device ? styles.hasStage : ''}`}>
       {device && <BenchStage mode={isRange ? 'range' : 'inspect'} slug={project.slug} />}
-      <header className={styles.bar}>
-        <Link to="/" className={styles.home}>
-          <span className={styles.mark} aria-hidden="true" />
-          MOI
-        </Link>
-        <Link to="/#work" className={styles.back}>
-          {copy.caseStudy.allWork}
-        </Link>
-      </header>
+      {/* Back goes to the project index, not to the homepage's Work band.
+          Someone who opened a case study came from a list of projects and
+          expects the list back — dropping them into the middle of the
+          homepage means finding their place in it again. */}
+      <Nav back={{ to: '/work', label: copy.caseStudy.allWork }} />
 
       <main id="main">
         {/* Hero */}
@@ -239,8 +245,42 @@ export function CaseStudy() {
             {copy.caseStudy.discuss}
           </Link>
         </section>
+
+        {/* --- where to go next ------------------------------------------
+            The end of a case study is the point at which a reader decides
+            whether to read another one. Leaving only a back link at the top
+            of the page made that decision cost a scroll to the top and a
+            second scroll down the index. */}
+        <nav className={`container ${styles.pager}`} aria-label={ui.navProjectPager}>
+          <Link to="/work" className={styles.pagerIndex}>
+            <svg width="22" height="8" viewBox="0 0 22 8" aria-hidden="true" data-arrow>
+              <path d="M22 4H2M5 1 1 4l4 3" stroke="currentColor" fill="none" strokeWidth="1.2" />
+            </svg>
+            <span>{copy.caseStudy.backToIndex}</span>
+          </Link>
+
+          <div className={styles.pagerPair}>
+            {prev && (
+              <Link to={`/work/${prev.slug}`} className={styles.pagerLink}>
+                <span className={styles.pagerKind}>{copy.caseStudy.prevProject}</span>
+                <span className={styles.pagerName}>{prev.name}</span>
+              </Link>
+            )}
+            {next && (
+              <Link
+                to={`/work/${next.slug}`}
+                className={`${styles.pagerLink} ${styles.pagerNext}`}
+              >
+                <span className={styles.pagerKind}>{copy.caseStudy.nextProject}</span>
+                <span className={styles.pagerName}>{next.name}</span>
+              </Link>
+            )}
+          </div>
+        </nav>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
