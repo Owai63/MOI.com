@@ -24,6 +24,8 @@
 
 import type { ProjectSlug } from '../../../data/content';
 import type { ProgramId } from '../screens/programs';
+import { AdditionalProject } from './AdditionalProjects';
+import type { AdditionalSlug } from '../../studio/Models';
 import { TrackerDevice } from './TrackerDevice';
 import { RangeFloorRig } from '../range/RangeFloorRig';
 import { Wheelchair } from './Wheelchair';
@@ -195,8 +197,22 @@ export const DEVICES: DeviceEntry[] = [
 export const deviceIndex = (slug: string) =>
   DEVICES.findIndex((d) => d.slug === slug);
 
+/** Extra case studies do not change the authored six-station homepage path. */
+const additionalSlugs: AdditionalSlug[] = [
+  'pet-tracker', 'cedrus-website', 'hospital-website', 'gesture-car',
+  'fsm-traffic', 'bank-system', 'food-order',
+];
+export const ADDITIONAL_DEVICES: DeviceEntry[] = additionalSlugs.map(slug => ({
+  slug,
+  render: () => <AdditionalProject slug={slug} />,
+  stageKind: 'mat',
+  stage: { position: [0, 0, 0], rotation: [0, 0, 0], scale: 0.12 },
+  inspect: { position: [0, 0, 0], rotation: [0, -0.18, 0], scale: slug === 'fsm-traffic' ? 0.12 : 0.14 },
+  distance: 0.7, lookHeight: 0.05, wave: 'serial', accent: '#3fe0d0',
+}));
+
 export const deviceFor = (slug: string) =>
-  DEVICES.find((d) => d.slug === slug) ?? null;
+  DEVICES.find(d => d.slug === slug) ?? ADDITIONAL_DEVICES.find(d => d.slug === slug) ?? null;
 
 /** Indices of the chapters staged out in the room rather than on the bench.
  *  Anything that dims the bench, or lifts the room's lights, keys off this. */

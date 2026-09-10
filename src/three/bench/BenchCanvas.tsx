@@ -40,13 +40,16 @@ import {
 } from '@react-three/postprocessing';
 import { ToneMappingMode, type DepthOfFieldEffect } from 'postprocessing';
 import * as THREE from 'three';
+import { sceneControls, inspectionValue, advanceInspection } from './interaction';
+import type { ProjectSlug } from '../../data/content';
+import { studios } from '../studio/catalog';
 import { Workbench } from './Workbench';
 import { sceneState } from '../sceneState';
 import { sampleStation, inspectPose, makePose } from './cameraPath';
 import { Spring3, Spring1, clampToRoom, portraitFraming, breathe } from './cameraRig';
 import { sampleShot, runnerX, FIRING_X, BACKSTOP_X } from './range/rangePath';
 import { SHELL, CEILING_FIXTURES } from './layout';
-import { isRoomChapter } from './devices/registry';
+import { isRoomChapter, deviceIndex } from './devices/registry';
 import { disposeMaterials } from './materials';
 import { disposeTextures } from './textures';
 import type { DeviceProfile } from '../../lib/quality';
@@ -72,9 +75,10 @@ const focusPoint = new THREE.Vector3(0, 0, 0);
  *  Shared by the initial state and by PerformanceMonitor's own starting factor,
  *  which are two different things that have to agree or the first frame undoes
  *  the second. */
-const START_FACTOR = 0.55;
+const START_FACTOR = 0.35;
 
-function CameraRig({ mode }: { mode: StageMode }) {
+function CameraRig({ mode, slug }: { mode: StageMode; slug?: string }) {
+  const additionalScene = Boolean(slug && deviceIndex(slug) < 0);
   const pose = useMemo(makePose, []);
   const posSpring = useMemo(() => new Spring3(), []);
   const lookSpring = useMemo(() => new Spring3(), []);
@@ -84,16 +88,22 @@ function CameraRig({ mode }: { mode: StageMode }) {
   const roll = useRef(0);
 
   useFrame(({ camera, size, clock }, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const cam = camera as THREE.PerspectiveCamera;
 
     if (mode === 'inspect') {
-      inspectPose(sceneState.explode, pose);
+      const separates = !slug || (studios[slug as ProjectSlug] as { exploded?: boolean } | undefined)?.exploded;
+      inspectPose(separates ? inspectionValue(sceneState.explode) : 0, pose);
     } else if (mode === 'range') {
       sampleShot(sceneState.rangeShot, sceneState.runnerAt, pose.pos, pose.look);
       pose.fov = 34;
     } else {
       sampleStation(sceneState.station, pose);
+    }
+
+    if (mode !== 'bench') {
+      forward.copy(pose.pos).sub(pose.look).divideScalar(sceneControls.zoom);
+      pose.pos.copy(pose.look).add(forward);
     }
 
     /* --- lens. A narrow viewport opens the lens rather than walking the
@@ -125,7 +135,7 @@ function CameraRig({ mode }: { mode: StageMode }) {
           ? sceneState.frameBias
           : 0
         : mode === 'inspect'
-          ? 0.5
+          ? additionalScene ? 0.2 : 0.5
           : mode === 'range'
             ? 0.26
             : sceneState.frameBias;
@@ -247,6 +257,24 @@ function SnapReset() {
   return null;
 }
 
+/** Pause only the free-running demonstration time. The reader keeps control
+ * of scroll, inspection and camera movement. The clamp prevents tab resumes
+ * from skipping an entire device cycle. */
+function SceneTime({ mode }: { mode: StageMode }) {
+  const elapsed = useRef(0);
+  useFrame(({ clock }, delta) => {
+    if (mode === 'bench' || !sceneControls.paused) elapsed.current += Math.min(delta, 0.1);
+    clock.elapsedTime = elapsed.current;
+    advanceInspection(delta, sceneState.explode);
+  }, -100);
+  return null;
+}
+
+function FocusTracking({ dof }: { dof: React.RefObject<DepthOfFieldEffect> }) {
+  useFrame(() => { if (dof.current) dof.current.target = focusPoint; });
+  return null;
+}
+
 /* --- lighting ------------------------------------------------------------ */
 
 function BenchLighting({ quality, mode }: { quality: 'high' | 'medium' | 'low'; mode: StageMode }) {
@@ -302,14 +330,15 @@ function BenchLighting({ quality, mode }: { quality: 'high' | 'medium' | 'low'; 
           castShadow={quality === 'high'}
           shadow-mapSize={[2048, 2048]}
           shadow-bias={-0.0004}
-          shadow-normalBias={0.008}
+          shadow-normalBias={0.002}
           shadow-camera-near={0.1}
           shadow-camera-far={5}
         />
         <pointLight position={[-0.95, 0.4, 0.65]} intensity={4.2} distance={4} decay={2} color="#7fb8ff" />
         {/* rim from behind, so a black enclosure still holds an edge */}
         <pointLight position={[-0.35, 0.55, -1.15]} intensity={4.4} distance={4} decay={2} color="#9fe6ff" />
-        <Environment resolution={quality === 'high' ? 256 : 64} frames={1}>
+        <Environment resolution={quality === 'high' ? 256 : 128} frames={1}>
+          <Lightformer form="rect" intensity={0.65} position={[-1.3, 0.7, -0.7]} scale={[0.8, 1.4, 1]} rotation={[0, Math.PI / 3, 0]} color="#f0d5ac" />
           <Lightformer form="rect" intensity={1.8} position={[0, 2, 0.6]} scale={[2.4, 1.2, 1]} color="#e8f4ff" />
           <Lightformer
             form="rect"
@@ -343,7 +372,7 @@ function BenchLighting({ quality, mode }: { quality: 'high' | 'medium' | 'low'; 
           scene, which is the exact look the brief was asking to get away from.
           The room gets its brightness from the ceiling run below, which has a
           position and therefore a falloff and a shape. */}
-      <hemisphereLight args={['#b9d4f2', '#3a2c1e', 0.4]} />
+      <hemisphereLight args={['#bfd8ed', '#493b2d', 0.44]} />
       <ambientLight intensity={0.1} color="#93a8bd" />
 
       {/* the batten over the bench — a wide, soft, slightly cool pool */}
@@ -368,7 +397,7 @@ function BenchLighting({ quality, mode }: { quality: 'high' | 'medium' | 'low'; 
         /* Normal bias, not a bigger depth bias: the bench is full of thin
            slabs lying flat, and biasing those by depth alone either acnes the
            benchtop or floats every shadow off the object casting it. */
-        shadow-normalBias={0.01}
+        shadow-normalBias={0.004}
         shadow-camera-near={0.1}
         shadow-camera-far={3.2}
       />
@@ -406,7 +435,7 @@ function BenchLighting({ quality, mode }: { quality: 'high' | 'medium' | 'low'; 
 
       {/* Baked once — this is what the metals, the glass and the solder mask
           reflect. Never re-rendered, so it costs nothing per frame. */}
-      <Environment resolution={quality === 'high' ? 256 : 64} frames={1}>
+      <Environment resolution={quality === 'high' ? 256 : 128} frames={1}>
         <Lightformer form="rect" intensity={2.8} position={[0, 2.2, 0.4]} scale={[3, 1.2, 1]} color="#e8f4ff" />
         <Lightformer form="rect" intensity={1.6} position={[0, 2.4, 2.4]} scale={[4, 1.4, 1]} color="#dceaff" />
         <Lightformer
@@ -486,12 +515,12 @@ function RangeLighting({ quality }: { quality: 'high' | 'medium' | 'low' }) {
         castShadow={quality === 'high'}
         shadow-mapSize={quality === 'high' ? [2048, 2048] : [1024, 1024]}
         shadow-bias={-0.0004}
-        shadow-normalBias={0.01}
+        shadow-normalBias={0.004}
         shadow-camera-near={0.4}
         shadow-camera-far={7}
       />
 
-      <Environment resolution={quality === 'high' ? 256 : 64} frames={1}>
+      <Environment resolution={quality === 'high' ? 256 : 128} frames={1}>
         <Lightformer form="rect" intensity={1.4} position={[0, 3, 0]} scale={[8, 1.2, 1]} rotation={[Math.PI / 2, 0, 0]} color="#dceaff" />
         <Lightformer form="rect" intensity={0.7} position={[-6, 1.2, 2]} scale={[2, 2, 1]} color="#9fd8ff" />
       </Environment>
@@ -511,6 +540,12 @@ export function BenchCanvas({
   slug?: string;
 }) {
   const [visible, setVisible] = useState(true);
+  const [pageVisible, setPageVisible] = useState(!document.hidden);
+  useEffect(() => {
+    const update = () => { setPageVisible(!document.hidden); if (!document.hidden) sceneState.snap = true; };
+    document.addEventListener('visibilitychange', update);
+    return () => document.removeEventListener('visibilitychange', update);
+  }, []);
   const q = profile.tier;
   const detail = q === 'high' ? 'high' : 'low';
 
@@ -543,20 +578,6 @@ export function BenchCanvas({
 
   const caOffset = useMemo(() => new THREE.Vector2(0.0004, 0.00036), []);
   const dof = useRef<DepthOfFieldEffect>(null);
-
-  /* Hand the pass the rig's aim point to focus on. Assigned rather than passed
-     as a prop: `target` is a plain field the effect reads during its own
-     update, so pointing it at the shared vector makes the focal plane follow
-     the subject for free. Passing it as a prop would copy the value once at
-     mount and then never again. */
-  useEffect(() => {
-    const effect = dof.current;
-    if (!effect) return;
-    effect.target = focusPoint;
-    return () => {
-      effect.target = null;
-    };
-  }, [profile.postprocessing, mode]);
 
   const post = usePostChain(profile.postprocessing, caOffset, dof);
 
@@ -611,7 +632,7 @@ export function BenchCanvas({
       style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none' }}
     >
       <Canvas
-        frameloop={visible ? 'always' : 'never'}
+        frameloop={visible && pageVisible ? 'always' : 'never'}
         dpr={dpr}
         /* PCF, not 'soft'. PCFSoftShadowMap does a variable-radius lookup that
            costs several times a plain PCF tap, and at this map size against a
@@ -636,6 +657,7 @@ export function BenchCanvas({
           gl.toneMappingExposure = 1.22;
         }}
       >
+        <SceneTime mode={mode} />
         <BenchLighting quality={q} mode={mode} />
         <Workbench mode={mode} slug={slug} detail={detail} />
 
@@ -655,7 +677,8 @@ export function BenchCanvas({
           />
         )}
 
-        <CameraRig mode={mode} />
+        <CameraRig mode={mode} slug={slug} />
+        <FocusTracking dof={dof} />
         <SnapReset />
 
         {/* Resolution that follows the machine rather than a guess about it.
@@ -685,7 +708,10 @@ export function BenchCanvas({
              leaving it at 1 would jump the resolution straight back up to the
              maximum on the first frame and undo the conservative seed above. */
           factor={START_FACTOR}
-          step={0.15}
+          step={0.1}
+          bounds={() => [45, 58]}
+          flipflops={4}
+          onFallback={() => setDpr(profile.dpr[0])}
           onChange={onPerformance}
         />
 

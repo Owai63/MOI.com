@@ -1,5 +1,9 @@
 /** Arabic copy for the new studio controls and project demonstrations. */
 export const studioAr: Record<string, string> = {
+  'Drag to rotate the model': 'اسحب لتدوير النموذج',
+  'Drag to rotate · Arrow keys also work': 'اسحب للتدوير · يمكنك أيضًا استخدام مفاتيح الأسهم',
+  'Following your scroll': 'يتبع تمرير الصفحة',
+  'Follow scroll': 'متابعة التمرير',
   'Explore in 3D': 'استكشف بتقنية ثلاثية الأبعاد',
   'Conceptual demonstration': 'عرض توضيحي تصوري',
   'Interactive project demonstration': 'عرض تفاعلي للمشروع',

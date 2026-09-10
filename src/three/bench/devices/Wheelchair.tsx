@@ -97,7 +97,7 @@ export function Wheelchair({
   );
 
   useFrame((state, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const want = sceneState.inspect ? 1 : live.current > POWER_GATE ? sceneState.power : 0;
     power.current = THREE.MathUtils.damp(power.current, want, POWER_RATE, d);
     const p = power.current;
@@ -126,7 +126,7 @@ export function Wheelchair({
     if (leftHub.current) leftHub.current.rotation.x += spin;
     if (rightHub.current) rightHub.current.rotation.x += spin;
     // castors trail: they swing to follow the direction of travel
-    const swing = THREE.MathUtils.clamp(moved * 60, -0.5, 0.5);
+    const swing = THREE.MathUtils.clamp(moved / Math.max(d, 1 / 240), -0.5, 0.5);
     for (const c of [castorL.current, castorR.current]) {
       if (c) c.rotation.y = THREE.MathUtils.damp(c.rotation.y, swing, 4, d);
     }

@@ -1,7 +1,3 @@
-import { useMemo } from 'react';
-import { getDeviceProfile } from '../../lib/quality';
-import { usePrefersReducedMotion } from '../../lib/useMediaQuery';
-import { ProjectVisual } from '../visuals/ProjectVisual';
 import { Link } from 'react-router-dom';
 import { useContent, useCopy, useUi, useFormat } from '../../i18n/useContent';
 import { SectionHeading } from '../ui/SectionHeading';
@@ -11,9 +7,6 @@ import styles from './Work.module.scss';
 
 export function Work() {
   const { featuredSlugs, getProject, isActive } = useContent();
-  const device = useMemo(getDeviceProfile, []);
-  const reduced = usePrefersReducedMotion();
-  const staticVisual = !device.webgl || device.tier === 'low' || reduced;
   const copy = useCopy();
   const ui = useUi();
   const fmt = useFormat();
@@ -107,9 +100,7 @@ export function Work() {
                     the viewport per chapter (see useBenchScroll), which is
                     what lands the object in the right place. */}
                 <Reveal className={styles.visual} delay={120}>
-                  <div className={styles.deviceWindow} data-scene-window aria-hidden="true">
-                    {staticVisual && <ProjectVisual slug={p!.slug} />}
-                  </div>
+                  <div className={styles.deviceWindow} data-scene-window aria-hidden="true" />
                 </Reveal>
               </div>
             </div>

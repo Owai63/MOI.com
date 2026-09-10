@@ -13,7 +13,7 @@
       exactly the "snap" that a scroll-driven camera is usually accused of. A
       spring carries velocity across the frame, so a reversal decelerates
       through zero and comes back. It is also unconditionally stable at any
-      timestep, which the implicit formulation below is chosen for — a dropped
+      timestep, which the analytic formulation below is chosen for — a dropped
       frame during a fast scroll must not be able to overshoot.
 
    2. A room clamp. The walkway makes the authored path safe, but pointer
@@ -36,11 +36,10 @@ import { BENCH, SHELL } from './layout';
 const AXES = ['x', 'y', 'z'] as const;
 
 /**
- * Implicit-Euler critically damped spring over a Vector3.
+ * Analytic critically damped spring over a Vector3.
  *
- * Solving implicitly rather than explicitly is what makes this safe to drive
- * from a scroll handler: the explicit form goes unstable once `dt * omega`
- * approaches 1, which is a 60Hz camera meeting a 15Hz frame.
+ * The exact constant-target solution is stable and gives the same settle at
+ * 30, 60 and 144 Hz. Target changes still follow the authored camera path.
  */
 export class Spring3 {
   readonly value = new THREE.Vector3();
@@ -48,19 +47,12 @@ export class Spring3 {
 
   /** @param omega natural frequency, rad/s. Higher is tighter. */
   step(target: THREE.Vector3, omega: number, dt: number) {
-    const f = 1 + 2 * dt * omega;
-    const oo = omega * omega;
-    const hoo = dt * oo;
-    const hhoo = dt * hoo;
-    const detInv = 1 / (f + hhoo);
-
-    for (let i = 0; i < 3; i++) {
-      const k = AXES[i];
-      const x = this.value[k];
-      const v = this.velocity[k];
-      const t = target[k];
-      this.value[k] = (f * x + dt * v + hhoo * t) * detInv;
-      this.velocity[k] = (v + hoo * (t - x)) * detInv;
+    const decay = Math.exp(-omega * dt);
+    for (const axis of AXES) {
+      const displacement = this.value[axis] - target[axis];
+      const coefficient = this.velocity[axis] + omega * displacement;
+      this.value[axis] = target[axis] + (displacement + coefficient * dt) * decay;
+      this.velocity[axis] = (this.velocity[axis] - omega * coefficient * dt) * decay;
     }
   }
 
@@ -77,15 +69,11 @@ export class Spring1 {
   velocity = 0;
 
   step(target: number, omega: number, dt: number) {
-    const f = 1 + 2 * dt * omega;
-    const oo = omega * omega;
-    const hoo = dt * oo;
-    const hhoo = dt * hoo;
-    const detInv = 1 / (f + hhoo);
-    const x = this.value;
-    const v = this.velocity;
-    this.value = (f * x + dt * v + hhoo * target) * detInv;
-    this.velocity = (v + hoo * (target - x)) * detInv;
+    const decay = Math.exp(-omega * dt);
+    const displacement = this.value - target;
+    const coefficient = this.velocity + omega * displacement;
+    this.value = target + (displacement + coefficient * dt) * decay;
+    this.velocity = (this.velocity - omega * coefficient * dt) * decay;
   }
 
   snap(target: number) {

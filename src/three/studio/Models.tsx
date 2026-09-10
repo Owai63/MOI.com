@@ -2,17 +2,35 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode, type Mutab
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { ProjectSlug } from '../../data/content';
-import { TrackerDevice } from '../bench/devices/TrackerDevice';
-import { OtaLink } from '../bench/devices/OtaLink';
-import { LifecycleBench } from '../bench/devices/LifecycleBench';
-import { VisionRig } from '../bench/devices/VisionRig';
-import { Wheelchair } from '../bench/devices/Wheelchair';
-import { Part, Cylinder, Board, StatusLight } from './parts';
+import { Part, Cylinder, Board, StatusLight, Cable, Screws, RepeatedParts, type V3 } from './parts';
+import { microSurface } from '../bench/surfaceDetails';
 import { makeScreen } from './screens';
 import { studios, stepAt } from './catalog';
 
 export interface StudioMotion { value: number; time: number; running: boolean }
 export type MotionRef = MutableRefObject<StudioMotion>;
+
+function Collar() {
+  const profile = useMemo(() => [
+    [0.86, -0.10], [0.93, -0.10], [0.945, -0.075], [0.945, 0.075],
+    [0.93, 0.10], [0.86, 0.10], [0.855, 0.075], [0.855, -0.075], [0.86, -0.10],
+  ].map(([r,y]) => new THREE.Vector2(r,y)), []);
+  const stitches = useMemo(() => [-1, 1].flatMap(y => Array.from({length: 56}, (_, i) => {
+    const a = i * Math.PI / 28;
+    return { at: [Math.sin(a) * 0.947, y * 0.067, Math.cos(a) * 0.947] as V3, rot: [0, a, 0] as V3 };
+  })), []);
+  return <group position={[0, 0.05, 0]}>
+    <mesh castShadow receiveShadow><latheGeometry args={[profile, 96]} />
+      <meshStandardMaterial color="#90643f" roughness={0.92} bumpMap={microSurface('polymer')} bumpScale={0.005} />
+    </mesh>
+    <RepeatedParts size={[0.023, 0.007, 0.003]} positions={stitches.map(s => s.at)} rotations={stitches.map(s => s.rot)} color="#c1a377" rough={0.9} radius={0.001} />
+    <group position={[-0.96, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      {[-1, 1].map(x => <Part key={x} size={[0.035, 0.24, 0.055]} position={[x * 0.13, 0, 0]} color="#aab2b3" metal={0.92} radius={0.012} />)}
+      {[-1, 1].map(y => <Part key={y} size={[0.29, 0.036, 0.055]} position={[0, y * 0.11, 0]} color="#aab2b3" metal={0.92} radius={0.012} />)}
+      <Part size={[0.027, 0.23, 0.025]} position={[0, 0, 0.035]} color="#bac0c0" metal={0.95} radius={0.01} />
+    </group>
+  </group>;
+}
 
 function PetTracker({ motion }: { motion: MotionRef }) {
   const lid = useRef<THREE.Group>(null);
@@ -25,18 +43,27 @@ function PetTracker({ motion }: { motion: MotionRef }) {
     if (battery.current) battery.current.position.y = v * 0.22;
   });
   return <group position={[0, -0.4, 0]} rotation={[0, -0.3, 0]}>
-    <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.05, 0]} castShadow>
-      <torusGeometry args={[0.93, 0.075, 12, 64]} />
-      <meshStandardMaterial color="#a76e47" roughness={0.9} />
-    </mesh>
-    <Part size={[0.29, 0.15, 0.3]} position={[-0.86, 0.07, 0]} color="#96a1aa" metal={0.85} />
-    <Part size={[1.05, 0.24, 0.76]} position={[0, 0.16, 0.52]} color="#253940" />
-    <group ref={battery}><Part size={[0.74, 0.1, 0.5]} position={[0, 0.31, 0.52]} color="#bfc4c7" metal={0.7} /></group>
-    <group ref={board}><Board position={[0, 0.43, 0.52]} /><Part size={[0.21, 0.08, 0.21]} position={[0.22, 0.51, 0.38]} color="#d6c4a1" rough={0.8} /></group>
+    <Collar />
+    <Part size={[1.05, 0.09, 0.76]} position={[0, 0.18, 0.52]} color="#253940" radius={0.06} />
+    {[-1, 1].map(x => <Part key={x} size={[0.075, 0.26, 0.76]} position={[x * 0.49, 0.33, 0.52]} color="#253940" />)}
+    {[-1, 1].map(z => <Part key={z} size={[0.93, 0.26, 0.055]} position={[0, 0.33, 0.52 + z * 0.35]} color="#253940" />)}
+    <group ref={battery}>
+      <Part size={[0.74, 0.10, 0.5]} position={[0, 0.29, 0.52]} color="#bfc4c7" metal={0.7} />
+      <Part size={[0.46, 0.002, 0.34]} position={[0, 0.341, 0.52]} color="#edf0db" rough={0.9} radius={0.005} />
+      <Cable points={[[0.36,0.29,0.47],[0.43,0.36,0.5],[0.36,0.39,0.63]]} radius={0.008} />
+      <Cable points={[[0.36,0.29,0.52],[0.43,0.37,0.56],[0.33,0.39,0.63]]} radius={0.008} color="#20272b" />
+    </group>
+    <group ref={board}><Board position={[0, 0.41, 0.52]} label="nRF9160 / LTE-M / GNSS" />
+      <Part size={[0.21, 0.08, 0.21]} position={[0.22, 0.50, 0.38]} color="#d6c4a1" rough={0.8} />
+      <Part size={[0.12, 0.005, 0.12]} position={[0.22, 0.543, 0.38]} color="#bca36a" metal={0.65} />
+    </group>
     <group ref={lid}>
-      <Part size={[1.06, 0.18, 0.77]} position={[0, 0.55, 0.52]} color="#d5e0df" rough={0.35} radius={0.07} />
-      <Part size={[0.57, 0.015, 0.36]} position={[0, 0.647, 0.52]} color="#b7cbc8" radius={0.05} />
-      <StatusLight position={[0.36, 0.65, 0.52]} />
+      {[-1,1].map(x => <Part key={x} size={[0.034,0.022,0.70]} position={[x*0.484,0.53,0.52]} color="#293538" rough={0.8} />)}
+      {[-1,1].map(z => <Part key={z} size={[0.97,0.022,0.034]} position={[0,0.53,0.52+z*0.34]} color="#293538" rough={0.8} />)}
+      <Part size={[1.06, 0.10, 0.77]} position={[0, 0.60, 0.52]} color="#d5e0df" rough={0.35} radius={0.07} />
+      <Part size={[0.57, 0.015, 0.36]} position={[0, 0.657, 0.52]} color="#b7cbc8" radius={0.05} />
+      <StatusLight position={[0.36, 0.66, 0.52]} />
+      <Screws positions={[-1,1].flatMap(x => [-1,1].map(z => [x * 0.43, 0.655, 0.52 + z * 0.28] as V3))} radius={0.017} />
     </group>
   </group>;
 }
@@ -64,18 +91,35 @@ function DataDrive() {
       <Part size={[0.33, 0.12, 0.025]} position={[0, -0.15 + i * 0.16, 0.29]} color="#182129" />
       <StatusLight position={[0.11, -0.15 + i * 0.16, 0.31]} />
     </group>)}
+    <RepeatedParts size={[0.015, 0.22, 0.004]} positions={Array.from({length: 12}, (_, i) => [-0.15 + i * 0.027, 0.11, 0.279])} color="#17242d" radius={0.001} />
+    <Screws positions={[-1,1].flatMap(x => [-1,1].map(z => [x * 0.16, 0.29, z * 0.22] as V3))} radius={0.012} />
   </group>;
 }
 
 function Workstation({ slug, value }: { slug: ProjectSlug; value: number }) {
   const step = stepAt(value, studios[slug].steps);
+  const keys = useMemo<V3[]>(() => [0,1,2,3].flatMap(row => Array.from({length:12}, (_,col) => [-0.72 + col * 0.117, -0.519, 0.62 + row * 0.105] as V3)), []);
   return <group rotation={[0, -0.2, 0]} position={[0, -0.05, 0]} scale={0.87}>
+    <Part size={[3.98, 0.11, 2.22]} position={[0, -0.70, 0.33]} color={slug === 'cedrus-website' ? '#8a7460' : '#394650'} rough={0.7} radius={0.08} />
+    <Part size={[2.84, 0.012, 1.18]} position={[0, -0.637, 0.70]} color="#182329" rough={0.93} radius={0.035} />
     <group position={[0, 0.63, -0.1]}><Display slug={slug} step={step} /></group>
     <Part size={[0.17, 0.46, 0.13]} position={[0, -0.38, -0.13]} metal={0.9} color="#a5b0b8" />
     <Part size={[0.91, 0.055, 0.56]} position={[0, -0.59, -0.01]} metal={0.9} color="#a5b0b8" />
     <Part size={[1.52, 0.055, 0.49]} position={[-0.08, -0.56, 0.8]} metal={0.75} color="#8b99a4" />
-    {[0, 1, 2, 3].flatMap(row => Array.from({ length: 12 }, (_, col) => <Part key={`${row}-${col}`} size={[0.094, 0.02, 0.075]} position={[-0.72 + col * 0.117, -0.519, 0.62 + row * 0.105]} color="#202b35" radius={0.007} />))}
+    <RepeatedParts size={[0.094, 0.02, 0.075]} positions={keys} color="#202b35" radius={0.007} />
+    <Part size={[0.46, 0.02, 0.075]} position={[-0.08, -0.519, 1.02]} color="#293742" radius={0.007} />
     <Part size={[0.22, 0.095, 0.34]} position={[0.97, -0.53, 0.83]} color="#aab5bc" metal={0.4} radius={0.04} />
+    <Part size={[0.016, 0.015, 0.10]} position={[0.97, -0.478, 0.77]} color="#263a44" radius={0.006} />
+    <Cable color="#202b33" points={[[0,-0.15,-0.20],[0.12,-0.50,-0.47],[0.58,-0.63,-0.52],[1.37,-0.63,-0.42],[1.6,-0.63,0.20]]} radius={0.018} />
+    <group position={[-1.58,-0.63,-0.47]}>
+      <Cylinder radius={0.22} height={0.055} position={[0,0,0]} color="#a1afb7" />
+      <Cylinder radius={0.02} height={0.95} position={[0,0.50,0]} />
+      <Part size={[0.48,0.055,0.17]} position={[0.17,0.99,0.03]} color="#a1afb7" metal={0.8} />
+      <mesh position={[0.17,0.96,0.03]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[0.40,0.12]} /><meshBasicMaterial color="#ffe5be" toneMapped={false} side={THREE.DoubleSide} /></mesh>
+    </group>
+    <Part size={[0.49,0.055,0.64]} position={[-1.57,-0.604,0.94]} rotation={[0,0.14,0]} color={slug === 'hospital-website' ? '#dbe7ec' : '#927451'} rough={0.9} />
+    <Part size={[0.45,0.035,0.61]} position={[-1.57,-0.575,0.94]} rotation={[0,0.14,0]} color="#d5d6c8" rough={1} />
+    <Cylinder radius={0.012} height={0.5} position={[-1.48,-0.547,0.94]} rotation={[Math.PI/2,0,0.12]} color="#b2b8b6" />
     {slug === 'bank-system' ? <DataDrive /> : <group position={[1.28, -0.1, 0.55]} rotation={[0, -0.28, 0]}><Display slug={slug} step={step} mobile /></group>}
     {slug === 'food-order' && <DataDrive />}
   </group>;
@@ -88,7 +132,11 @@ function RobotWheel({ position, motion }: { position: [number, number, number]; 
     <Cylinder position={[0, 0, 0]} radius={0.23} height={0.16} color="#171e26" metal={0} />
     <Cylinder position={[0, 0.085, 0]} radius={0.14} height={0.012} color="#a6afb7" />
     <Cylinder position={[0, -0.085, 0]} radius={0.14} height={0.012} color="#a6afb7" />
-    {Array.from({ length: 8 }, (_, i) => <Part key={i} size={[0.038, 0.18, 0.04]} position={[Math.sin(i * Math.PI / 4) * 0.22, 0, Math.cos(i * Math.PI / 4) * 0.22]} rotation={[0, i * Math.PI / 4, 0]} color="#262e35" radius={0.007} />)}
+    <RepeatedParts size={[0.028, 0.18, 0.018]} positions={Array.from({length:24}, (_, i) => [Math.sin(i*Math.PI/12)*0.231,0,Math.cos(i*Math.PI/12)*0.231])} rotations={Array.from({length:24}, (_, i) => [0,i*Math.PI/12,0])} color="#31383b" rough={0.8} radius={0.004} />
+    {[-1,1].map(y => <group key={y} position={[0,y*0.097,0]}>
+      <Cylinder position={[0,0,0]} radius={0.042} height={0.02} color="#d0b273" />
+      <RepeatedParts size={[0.022,0.006,0.065]} positions={Array.from({length:5}, (_, i) => [Math.sin(i*Math.PI/2.5)*0.092,0,Math.cos(i*Math.PI/2.5)*0.092])} rotations={Array.from({length:5}, (_, i) => [0,i*Math.PI/2.5,0])} color="#46535d" radius={0.005} />
+    </group>)}
   </group></group>;
 }
 
@@ -107,8 +155,18 @@ function GestureCar({ motion }: { motion: MotionRef }) {
     <group ref={car}>
       <Part size={[1.05, 0.11, 1.33]} position={[0.3, 0.12, 0]} color="#b7a778" metal={0.4} />
       {[-1, 1].flatMap(x => [-1, 1].map(z => <RobotWheel key={`${x}${z}`} motion={motion} position={[0.3 + x * 0.61, 0.02, z * 0.44]} />))}
-      <Board position={[0.3, 0.26, 0]} scale={0.8} />
+      {[-1,1].flatMap(x => [-1,1].map(z => <group key={`${x}:${z}`} position={[0.3+x*0.4,0.08,z*0.44]}>
+        <Part size={[0.18,0.20,0.36]} color="#c4a849" rough={0.48} />
+        <Cylinder position={[x*0.11,0,0]} radius={0.06} height={0.14} rotation={[0,0,Math.PI/2]} color="#aab0b0" />
+      </group>))}
+      <Board position={[0.3, 0.29, 0]} scale={0.8} label="ARDUINO / MOTOR CONTROL" />
+      <Screws positions={[-1,1].flatMap(x => [-1,1].map(z => [0.3+x*0.44,0.18,z*0.58] as V3))} />
+      {[-1,1].map(x => <Cylinder key={x} position={[0.3+x*0.27,0.225,-0.19]} radius={0.025} height={0.16} color="#cbaa63" />)}
       <Part size={[0.54, 0.19, 0.25]} position={[0.3, 0.28, 0.48]} color="#202d40" />
+      <RepeatedParts size={[0.023,0.16,0.22]} positions={Array.from({length:7}, (_,i) => [0.08+i*0.072,0.43,0.47])} color="#53616b" metal={0.8} />
+      <Cable points={[[0.52,0.32,0.46],[0.66,0.45,0.22],[0.64,0.34,-0.08],[0.55,0.32,-0.12]]} />
+      <Cable points={[[0.09,0.32,0.46],[-0.08,0.4,0.25],[-0.06,0.12,-0.37]]} color="#debb4d" />
+      <Cable points={[[0.53,0.31,0.38],[0.64,0.25,0.3],[0.71,0.1,0.41]]} color="#22282f" />
       <Cylinder position={[0.62, 0.51, -0.45]} height={0.65} radius={0.017} color="#353e48" />
       <StatusLight position={[0.43, 0.39, -0.08]} />
     </group>
@@ -116,7 +174,10 @@ function GestureCar({ motion }: { motion: MotionRef }) {
       <group ref={controller}>
         <Part size={[0.56, 0.13, 0.77]} color="#3a494e" rough={0.9} radius={0.06} />
         <Part size={[0.4, 0.1, 0.38]} position={[0, 0.12, 0]} color="#536e66" />
-        <Board position={[0, 0.18, 0]} scale={0.42} />
+        <Board position={[0, 0.18, 0]} scale={0.42} label="IMU / RF" />
+        <Part size={[0.58,0.035,0.14]} position={[0,0.13,0.26]} color="#172427" rough={0.95} />
+        <Part size={[0.04,0.17,0.14]} position={[-0.28,0.04,0.26]} color="#172427" rough={0.95} />
+        <Cable points={[[0.14,0.20,0.10],[0.23,0.22,0.15],[0.21,0.13,0.24]]} radius={0.009} />
         <Cylinder position={[0.19, 0.38, -0.25]} height={0.38} radius={0.012} />
         {[0, 1, 2, 3].map(i => <Part key={i} size={[0.095, 0.10, 0.32 + (i === 1 ? 0.08 : 0)]} position={[-0.19 + i * 0.125, 0, -0.51]} color="#3a494e" radius={0.035} />)}
       </group>
@@ -124,7 +185,30 @@ function GestureCar({ motion }: { motion: MotionRef }) {
   </group>;
 }
 
-function Traffic({ value }: { value: number }) {
+function JunctionCar({ green, color, motion }: { green: boolean; color: string; motion: MotionRef }) {
+  const group = useRef<THREE.Group>(null);
+  const progress = useRef(1.5);
+  const lastTime = useRef(0);
+  useFrame(() => {
+    const time = motion.current.time;
+    const dt = Math.max(0, Math.min(0.1, time - lastTime.current)); lastTime.current = time;
+    const stopLine = 1.13;
+    if (green || progress.current < stopLine - 0.01) progress.current -= dt * 0.66;
+    else progress.current = Math.max(stopLine, progress.current - dt * 0.66);
+    if (progress.current < -2.25) progress.current = 2.25;
+    if (group.current) { group.current.position.z = progress.current; group.current.visible = Math.abs(progress.current) < 1.82; }
+  });
+  return <group ref={group} position={[-0.32,0.20,1.5]}>
+    <Part size={[0.30,0.14,0.56]} color={color} metal={0.5} rough={0.3} radius={0.055} />
+    <Part size={[0.255,0.12,0.28]} position={[0,0.10,0.02]} color="#253945" metal={0.6} rough={0.2} radius={0.045} />
+    <Part size={[0.265,0.016,0.19]} position={[0,0.165,0.03]} color={color} metal={0.5} radius={0.025} />
+    {[-1,1].flatMap(x => [-1,1].map(z => <Cylinder key={`${x}:${z}`} position={[x*0.15,-0.065,z*0.18]} radius={0.065} height={0.037} rotation={[0,0,Math.PI/2]} color="#161e22" metal={0} />))}
+    <RepeatedParts size={[0.076,0.025,0.008]} positions={[[-0.086,0.01,-0.275],[0.086,0.01,-0.275]]} color="#ebe5cc" rough={0.25} />
+    <RepeatedParts size={[0.07,0.025,0.008]} positions={[[-0.09,0.01,0.279],[0.09,0.01,0.279]]} color="#c25043" rough={0.25} />
+  </group>;
+}
+
+function Traffic({ value, motion }: { value: number; motion: MotionRef }) {
   const phase = stepAt(value, studios['fsm-traffic'].steps);
   return <group position={[0, -0.55, 0]} rotation={[0, Math.PI / 4, 0]} scale={0.83}>
     <Part size={[3.8, 0.12, 3.8]} color="#41534b" rough={0.98} />
@@ -135,6 +219,13 @@ function Traffic({ value }: { value: number }) {
       {Array.from({ length: 5 }, (_, i) => <Part key={`walk${i}`} size={[0.12, 0.008, 0.21]} position={[-0.48 + i * 0.24, 0.105, 0.8]} color="#d1d2cb" />)}
       <Cylinder position={[0.84, 0.64, 0.86]} radius={0.032} height={1.15} />
       <Part size={[0.22, 0.54, 0.16]} position={[0.84, 1.2, 0.86]} color="#1a2329" radius={0.03} />
+      <Cylinder position={[0.84,0.145,0.86]} radius={0.075} height={0.045} color="#899798" />
+      <Part size={[0.56,0.015,0.045]} position={[-0.32,0.107,1.02]} color="#d1d2cb" radius={0.003} />
+      <JunctionCar green={side%2 === 0 ? phase === 0 : phase === 3} color={['#afb5b3','#ba7860','#657f91','#c2aa79'][side]} motion={motion} />
+      <Part size={[0.82,0.07,0.82]} position={[1.39,0.10,1.39]} color="#9d9f93" rough={0.95} radius={0.04} />
+      <Part size={[0.54,0.44 + (side%2)*0.18,0.48]} position={[1.42,0.37 + (side%2)*0.09,1.42]} color={side%2 ? '#777970' : '#a3917b'} rough={0.9} radius={0.015} />
+      <RepeatedParts size={[0.11,0.10,0.012]} positions={[-1,1].flatMap(x => [0,1].map(y => [1.42+x*0.14,0.30+y*0.15,1.174] as V3))} color="#344c59" metal={0.4} />
+      <Part size={[0.58,0.035,0.52]} position={[1.42,0.61+(side%2)*0.18,1.42]} color="#535f5e" rough={0.8} />
       {[0, 1, 2].map(lamp => {
         const green = side % 2 === 0 ? phase === 0 : phase === 3;
         const amber = side % 2 === 0 ? phase === 1 : phase === 4;
@@ -149,60 +240,15 @@ function Traffic({ value }: { value: number }) {
   </group>;
 }
 
-function Range({ motion }: { motion: MotionRef }) {
-  const carriage = useRef<THREE.Group>(null);
-  useFrame(() => { if (carriage.current) carriage.current.position.x = (motion.current.value - 0.5) * 2.9; });
-  return <group position={[0, -0.6, 0]} rotation={[0, -0.18, 0]}>
-    <Part size={[3.9, 0.10, 1.18]} position={[0, 0, 0]} color="#566163" rough={0.92} />
-    {[-1, 1].map(z => <Part key={z} size={[3.8, 0.09, 0.055]} position={[0, 0.12, z * 0.29]} color="#9ba8b3" metal={0.9} rough={0.24} />)}
-    {Array.from({ length: 12 }, (_, i) => <Part key={i} size={[0.045, 0.065, 0.82]} position={[-1.78 + i * 0.32, 0.07, 0]} color="#273139" metal={0.7} />)}
-    {[-1, 1].map(x => <Part key={x} size={[0.09, 0.17, 0.8]} position={[x * 1.86, 0.17, 0]} color="#bc935b" metal={0.5} />)}
-    <group ref={carriage}>
-      <Part size={[0.59, 0.14, 0.71]} position={[0, 0.24, 0]} color="#48544d" metal={0.65} />
-      <Part size={[0.40, 0.17, 0.43]} position={[0, 0.39, 0]} color="#35413a" />
-      <Cylinder radius={0.032} height={0.47} position={[0.2, 0.7, -0.12]} color="#252f37" />
-      <Part size={[0.055, 0.8, 0.055]} position={[0, 0.83, 0]} metal={0.8} />
-      <Part size={[0.46, 0.59, 0.055]} position={[0, 1.33, 0]} color="#c2b795" rough={0.9} radius={0.09} />
-      <Cylinder radius={0.14} height={0.055} position={[0, 1.76, 0]} rotation={[Math.PI / 2, 0, 0]} color="#c2b795" metal={0} />
-      <StatusLight position={[0.12, 0.48, 0.16]} color="#edb66d" />
-    </group>
-    <group position={[-1.4, 0.17, 0.84]} rotation={[0.3, 0, 0]}>
-      <Part size={[0.6, 0.27, 0.36]} color="#263841" />
-      <Part size={[0.36, 0.14, 0.018]} position={[-0.03, 0.025, 0.187]} color="#477d77" />
-      <Cylinder radius={0.015} height={0.45} position={[-0.2, 0.33, -0.1]} color="#262d33" />
-    </group>
-  </group>;
-}
+export type AdditionalSlug = Extract<ProjectSlug, 'pet-tracker' | 'cedrus-website' | 'hospital-website' | 'gesture-car' | 'fsm-traffic' | 'bank-system' | 'food-order'>;
 
-/** Existing photo-informed hardware is re-lit and reframed in the new studio. */
-export function ProjectModel({ slug, motion, value, detail }: {
-  slug: ProjectSlug; motion: MotionRef; value: number; detail: 'high' | 'low';
-}) {
-  const activeRef = useRef(1);
-  const props = { activeRef, detail };
+export function AdditionalModel({ slug, motion, value }: { slug: AdditionalSlug; motion: MotionRef; value: number }) {
   switch (slug) {
-    case 'mymo2': return <group scale={15} position={[-0.3, -0.25, 0.15]} rotation={[0, -0.35, 0]}><TrackerDevice {...props} /></group>;
-    case 'device-management': return <group scale={7} position={[0, -0.45, 0]} rotation={[0, -0.1, 0]}><OtaLink {...props} /></group>;
-    case 'lifecycle-database': return <group scale={8} position={[0, -0.3, 0]} rotation={[0, -0.2, 0]}><LifecycleBench {...props} /></group>;
-    case 'violence-detection': return <group scale={10} position={[0, -0.4, 0]} rotation={[0, 0.55, 0]}><VisionRig {...props} /></group>;
-    case 'wheelchair': return <group scale={1.8} position={[0, -0.7, 0]} rotation={[0, -0.35, 0]}><Wheelchair {...props} /></group>;
     case 'pet-tracker': return <PetTracker motion={motion} />;
     case 'gesture-car': return <GestureCar motion={motion} />;
-    case 'fsm-traffic': return <Traffic value={value} />;
-    case 'shooting-range': return <Range motion={motion} />;
+    case 'fsm-traffic': return <Traffic value={value} motion={motion} />;
     default: return <Workstation slug={slug} value={value} />;
   }
-}
-
-export function HeroModel() {
-  const active = useRef(1);
-  return <group rotation={[0, -0.35, 0]}>
-    <Workstation slug="cedrus-website" value={0} />
-    <group position={[-1.4, -0.53, 0.62]} scale={7} rotation={[0, 0.5, 0]}>
-      <TrackerDevice activeRef={active} detail="low" />
-    </group>
-    <Part size={[4.4, 0.1, 2.5]} position={[0, -0.71, 0.28]} color="#24343e" metal={0.45} rough={0.38} radius={0.08} />
-  </group>;
 }
 
 /** Release materials supplied via mesh props as well as declarative resources.

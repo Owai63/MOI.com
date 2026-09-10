@@ -28,7 +28,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Pcb, Header, Electrolytic, Qfp } from '../parts/Pcb';
 import { Shell, Wire, SleevedLoom, Led, Screws } from '../parts/primitives';
-import { deviceMaterials, WIRE_COLORS } from '../materials';
+import { deviceMaterials, useDeviceMaterials, WIRE_COLORS } from '../materials';
 import { caseShellTexture, type PcbSpec } from '../textures';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
@@ -88,7 +88,7 @@ export function ControllerCase({
   powerRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind } = useAssembly(PARTS, activeRef);
   const lid = useRef<THREE.Group>(null);
   const shellTex = useMemo(() => caseShellTexture(), []);
@@ -99,7 +99,7 @@ export function ControllerCase({
      also lifts clear so the interior can be read. */
   useFrame((_, delta) => {
     if (!lid.current) return;
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const solo = sceneState.stage !== 'bench';
     const open = solo
       ? Math.max(powerRef.current, sceneState.explode)

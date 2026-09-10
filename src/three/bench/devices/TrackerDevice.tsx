@@ -112,7 +112,7 @@ export function TrackerDevice({
       power.current,
       want,
       POWER_RATE,
-      Math.min(delta, 1 / 30),
+      Math.min(delta, 0.1),
     );
   });
 

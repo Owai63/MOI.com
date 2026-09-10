@@ -19,6 +19,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { inspectionValue } from './interaction';
 import { sceneState } from '../sceneState';
 
 export interface PartSpec {
@@ -101,7 +102,7 @@ export function useAssembly(
   );
 
   useFrame((_, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const active = activeRef.current;
 
     // `build` is per-device: the shared build progress scaled by whether this
@@ -116,7 +117,12 @@ export function useAssembly(
       : THREE.MathUtils.damp(live.current, targetBuild, 7.5, d);
 
     const build = live.current;
-    const explode = solo ? sceneState.explode : 0;
+    const explode = solo ? inspectionValue(sceneState.explode) : 0;
+    if (!solo && active === 0 && build < 0.0001) {
+      // Preserve every model; skip transform/material work while it is hidden.
+      for (const item of items.current) if (item) item.visible = false;
+      return;
+    }
 
     for (let i = 0; i < table.n; i++) {
       const el = items.current[i];

@@ -24,9 +24,12 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { sceneControls } from '../interaction';
 import { sceneState } from '../../sceneState';
-import { benchMaterials, deviceMaterials } from '../materials';
+import { benchMaterials, deviceMaterials, useDeviceMaterials } from '../materials';
 import { rangeMarkerTexture } from '../textures';
+import { floorTextures } from '../roomTextures';
+import { microSurface } from '../surfaceDetails';
 import { Laptop } from '../props/Computers';
 import { Rail } from './Rail';
 import { TargetRunner } from './TargetRunner';
@@ -57,7 +60,7 @@ const MARKERS: [number, string][] = [
 
 export function RangeScene({ detail = 'high' }: { detail?: 'high' | 'low' }) {
   const m = benchMaterials();
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const at = useRef(0);
   const power = useRef(1);
 
@@ -66,26 +69,33 @@ export function RangeScene({ detail = 'high' }: { detail?: 'high' | 'low' }) {
      stops a fast flick reading as a teleport, and it is also what gives the
      wheels a velocity to turn at during the settle. */
   useFrame((_, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
+    const requested = sceneControls.runner ?? sceneState.runner;
     at.current = sceneState.snap
-      ? sceneState.runner
-      : THREE.MathUtils.damp(at.current, sceneState.runner, 6, d);
+      ? requested
+      : THREE.MathUtils.damp(at.current, requested, 9, d);
     // the camera's tracking shots follow the carriage, not the instruction
     sceneState.runnerAt = at.current;
     power.current = 1;
   });
 
-  const concrete = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({ color: '#2a2f36', roughness: 0.93, metalness: 0.05 }),
-    [],
-  );
+  const floorMaps = useMemo(() => {
+    const source = floorTextures();
+    const map = source.map.clone(); const roughness = source.roughness.clone();
+    for (const texture of [map, roughness]) { texture.repeat.set(7, 2); texture.needsUpdate = true; }
+    return { map, roughness };
+  }, []);
+  useEffect(() => () => { floorMaps.map.dispose(); floorMaps.roughness.dispose(); }, [floorMaps]);
+  const concrete = useMemo(() => new THREE.MeshStandardMaterial({
+    map: floorMaps.map, roughnessMap: floorMaps.roughness, bumpMap: floorMaps.roughness,
+    bumpScale: 0.0015, color: '#aab7c3', roughness: 0.94, metalness: 0.05,
+  }), [floorMaps]);
   const paint = useMemo(
     () => new THREE.MeshStandardMaterial({ color: '#8a7326', roughness: 0.9, metalness: 0 }),
     [],
   );
   const baffle = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#0f1216', roughness: 0.92, metalness: 0.06 }),
+    () => new THREE.MeshStandardMaterial({ color: '#14181c', roughness: 0.92, metalness: 0.06, bumpMap: microSurface('polymer'), bumpScale: 0.001 }),
     [],
   );
   const strip = useMemo(

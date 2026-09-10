@@ -90,7 +90,7 @@ export function RangeFloorRig({
   }, [toLane]);
 
   useFrame((state, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const want = live.current > POWER_GATE ? sceneState.power : 0;
     power.current = THREE.MathUtils.damp(power.current, want, POWER_RATE, d);
 

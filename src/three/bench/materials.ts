@@ -1,3 +1,4 @@
+import { microSurface, disposeSurfaceDetails } from './surfaceDetails';
 import { useEffect, useMemo } from 'react';
 /* ============================================================================
    materials — shared bench materials, and per-device material sets
@@ -59,6 +60,7 @@ export function disposeMaterials() {
   bench = null;
   room = null;
   disposeRoomTextures();
+  disposeSurfaceDetails();
 }
 
 /* --- bench furniture (shared, never faded) -------------------------------- */
@@ -406,8 +408,11 @@ export function deviceMaterials() {
     /** moulded ABS device enclosure */
     abs: own(
       new THREE.MeshStandardMaterial({
-        color: '#17181b',
-        roughness: 0.62,
+        color: '#1d2024',
+        bumpMap: microSurface('polymer'),
+        bumpScale: 0.000035,
+        roughnessMap: microSurface('polymer'),
+        roughness: 0.72,
         metalness: 0.05,
       }),
     ),
@@ -415,6 +420,8 @@ export function deviceMaterials() {
     caseShell: own(
       new THREE.MeshStandardMaterial({
         map: caseShellTexture(),
+        bumpMap: microSurface('polymer'),
+        bumpScale: 0.00008,
         color: '#8f8568',
         roughness: 0.9,
         metalness: 0.02,
@@ -424,7 +431,10 @@ export function deviceMaterials() {
     metal: own(
       new THREE.MeshStandardMaterial({
         map: brushedTexture(),
-        color: '#8f979f',
+        bumpMap: microSurface('metal'),
+        bumpScale: 0.000016,
+        roughnessMap: microSurface('metal'),
+        color: '#a0a8b0',
         // A near-mirror finish on the brackets turned every rim light into a
         // blown highlight; machined aluminium is satin, not chrome.
         roughness: 0.48,
@@ -435,7 +445,9 @@ export function deviceMaterials() {
     steel: own(
       new THREE.MeshStandardMaterial({
         color: '#c2c8ce',
-        roughness: 0.22,
+        bumpMap: microSurface('metal'),
+        bumpScale: 0.000006,
+        roughness: 0.25,
         metalness: 1,
       }),
     ),

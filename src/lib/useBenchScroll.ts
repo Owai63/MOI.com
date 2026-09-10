@@ -23,8 +23,7 @@ import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { sceneState } from '../three/sceneState';
-import { featuredSlugs } from '../data/content';
-const LAST_STATION = featuredSlugs.length + 1;
+import { LAST_STATION } from '../three/bench/cameraPath';
 import { rangeAt } from '../three/bench/range/rangePath';
 
 gsap.registerPlugin(ScrollTrigger);

@@ -114,7 +114,7 @@ export function CommandLink({
 
   useFrame((state, delta) => {
     const power = powerRef.current;
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
 
     // the far end: the whip on the case, wherever the carriage has got to
     b.set(ANTENNA_TIP[0] + (atRef.current - 0.5) * travel, ANTENNA_TIP[1], ANTENNA_TIP[2]);

@@ -40,7 +40,7 @@ export function getDeviceProfile(): DeviceProfile {
 
   /* CPU count and reported memory are weak proxies for GPU throughput, which
      is the thing that actually matters here — so this only sets a CEILING.
-     What the machine really manages is measured at runtime: StudioCanvas opens
+     What the machine really manages is measured at runtime: BenchCanvas opens
      below the ceiling and lets drei's PerformanceMonitor walk the resolution
      up or down from real frame times (see the <PerformanceMonitor> near the
      bottom of that file).
