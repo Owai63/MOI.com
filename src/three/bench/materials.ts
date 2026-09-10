@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 /* ============================================================================
    materials — shared bench materials, and per-device material sets
    ----------------------------------------------------------------------------
@@ -37,6 +38,7 @@ import {
 const owned: THREE.Material[] = [];
 function own<T extends THREE.Material>(m: T): T {
   owned.push(m);
+  m.addEventListener('dispose', () => { const at = owned.indexOf(m); if (at >= 0) owned.splice(at, 1); });
   return m;
 }
 
@@ -50,7 +52,7 @@ const ownedTextures: THREE.Texture[] = [];
 
 /** Dispose every material this module created. */
 export function disposeMaterials() {
-  for (const m of owned) m.dispose();
+  for (const m of [...owned]) m.dispose();
   owned.length = 0;
   for (const t of ownedTextures) t.dispose();
   ownedTextures.length = 0;
@@ -500,3 +502,10 @@ export const WIRE_COLORS = {
   yellow: '#c9a227',
   white: '#c9ced3',
 } as const;
+
+/** Material sets belong to the mounted device, not the history of visited scenes. */
+export function useDeviceMaterials() {
+  const materials = useMemo(deviceMaterials, []);
+  useEffect(() => () => Object.values(materials).forEach(material => material.dispose()), [materials]);
+  return materials;
+}

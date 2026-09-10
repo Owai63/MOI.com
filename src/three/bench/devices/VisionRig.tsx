@@ -21,7 +21,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Wire, Led, Screws } from '../parts/primitives';
-import { deviceMaterials, ledMaterial } from '../materials';
+import { useDeviceMaterials, ledMaterial } from '../materials';
 import { visionTargetTexture } from '../textures';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
@@ -105,7 +105,7 @@ export function VisionRig({
   activeRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind, live } = useAssembly(PARTS, activeRef);
   const power = useRef(0);
 

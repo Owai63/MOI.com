@@ -1,3 +1,5 @@
+import { studios } from '../three/studio/catalog';
+import { studioAr } from '../three/studio/ar';
 /* ============================================================================
    surface — the complete set of English words the site can render
    ----------------------------------------------------------------------------
@@ -24,6 +26,7 @@ export interface SurfaceGroup {
 /** Grouped so the translate script can report where a missing string lives. */
 export function englishSurfaceGroups(): SurfaceGroup[] {
   return [
+    { name: 'studios', strings: [...Object.keys(studioAr), ...Object.values(studios).flatMap(({ accent: _accent, ...copy }) => [...collectStrings(copy, NO_SKIP)])] },
     { name: 'content', strings: [...collectStrings(enDict)] },
     // ui/copy hold display copy only — no identifiers, so nothing is skipped.
     { name: 'ui', strings: [...collectStrings(uiEn, NO_SKIP)] },

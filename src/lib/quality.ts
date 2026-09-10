@@ -17,10 +17,10 @@ let cached: DeviceProfile | null = null;
 function detectWebGL(): boolean {
   try {
     const canvas = document.createElement('canvas');
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-    );
+    const context = canvas.getContext('webgl2');
+    const supported = Boolean(context);
+    context?.getExtension('WEBGL_lose_context')?.loseContext();
+    return supported;
   } catch {
     return false;
   }
@@ -40,7 +40,7 @@ export function getDeviceProfile(): DeviceProfile {
 
   /* CPU count and reported memory are weak proxies for GPU throughput, which
      is the thing that actually matters here — so this only sets a CEILING.
-     What the machine really manages is measured at runtime: BenchCanvas opens
+     What the machine really manages is measured at runtime: StudioCanvas opens
      below the ceiling and lets drei's PerformanceMonitor walk the resolution
      up or down from real frame times (see the <PerformanceMonitor> near the
      bottom of that file).
@@ -59,7 +59,7 @@ export function getDeviceProfile(): DeviceProfile {
     tier = 'medium';
   }
 
-  /* Touch devices pay for the scene twice: the bench is a full-viewport fixed
+  /* Touch devices pay for the scene twice: the homepage is a full-viewport fixed
      canvas, so every frame is both rendered and then composited underneath
      scrolling page content. Capping resolution and dropping MSAA there is the
      difference between a smooth scroll and a stuttering one, and at phone

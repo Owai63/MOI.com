@@ -1,23 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useContent, useCopy, useUi } from '../i18n/useContent';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/sections/Footer';
-import { ProjectVisual } from '../components/visuals/ProjectVisual';
+import { ProjectStudio } from '../three/studio/ProjectStudio';
 import { TagList } from '../components/ui/TagList';
-import { BenchStage } from '../three/BenchStage';
-import { deviceFor } from '../three/bench/devices/registry';
 import { useLenis } from '../lib/useLenis';
-import { useInspectScroll, useRangeScroll } from '../lib/useBenchScroll';
 import { NotFound } from './NotFound';
 import styles from './CaseStudy.module.scss';
-
-/** The scrubbed band the exploded view is driven by. */
-const INSPECT_BAND = 'inspect-band';
-/** The scrubbed band the range sequence is driven by. */
-const RANGE_BAND = 'range-band';
-/** The one project whose case study is a place rather than an object. */
-const RANGE_SLUG = 'shooting-range';
 
 export function CaseStudy() {
   const { getProject, projects, profile, isActive } = useContent();
@@ -33,21 +23,7 @@ export function CaseStudy() {
   const prev = at > 0 ? projects[at - 1] : null;
   const next = at >= 0 && at < projects.length - 1 ? projects[at + 1] : null;
 
-  /* Projects with a modelled device get the live inspection stage; the rest
-     keep their illustrative image. `deviceFor` is the single source of truth
-     for which is which — see three/bench/devices/registry.tsx. */
-  const device = deviceFor(slug ?? '');
-
-  /* The shooting range is the one case study whose subject is a lane rather
-     than an object, so it gets the full set and a six-shot sequence instead
-     of a turntable and an exploded view. */
-  const isRange = Boolean(device) && slug === RANGE_SLUG;
-  const [beat, setBeat] = useState(0);
-  const onBeat = useCallback((i: number) => setBeat(i), []);
-
   useLenis(true);
-  useInspectScroll(Boolean(device) && !isRange, INSPECT_BAND);
-  useRangeScroll(isRange, RANGE_BAND, onBeat);
 
   useEffect(() => {
     if (project) document.title = `${project.name} — ${profile.displayName}`;
@@ -59,8 +35,7 @@ export function CaseStudy() {
   if (!project) return <NotFound />;
 
   return (
-    <div className={`${styles.page} ${device ? styles.hasStage : ''}`}>
-      {device && <BenchStage mode={isRange ? 'range' : 'inspect'} slug={project.slug} />}
+    <div className={styles.page}>
       {/* Back goes to the project index, not to the homepage's Work band.
           Someone who opened a case study came from a list of projects and
           expects the list back — dropping them into the middle of the
@@ -104,64 +79,9 @@ export function CaseStudy() {
             </dl>
           </div>
 
-          {isRange ? (
-            /* The range sequence. A very tall hole in the page: the lane is
-               rendered on the fixed canvas behind it, and scrolling this band
-               is what drives the camera, the target and the case. Every
-               caption is in the DOM in order — only one is visible at a time,
-               but a reader who cannot see the scene still gets the whole
-               sequence as prose. */
-            <div id={RANGE_BAND} className={styles.rangeBand} data-scene-window>
-              <div className={styles.rangeSticky}>
-                <div className={styles.rangeCaptions}>
-                  {copy.rangeSequence.beats.map((b, i) => (
-                    <figure
-                      key={b.title}
-                      className={styles.rangeCaption}
-                      data-active={i === beat ? 'true' : undefined}
-                    >
-                      <figcaption className={styles.rangeStep}>
-                        {String(i + 1).padStart(2, '0')}
-                        <span aria-hidden="true"> / {String(copy.rangeSequence.beats.length).padStart(2, '0')}</span>
-                      </figcaption>
-                      <h2 className={styles.rangeTitle}>{b.title}</h2>
-                      <p className={styles.rangeBody}>{b.body}</p>
-                    </figure>
-                  ))}
-                </div>
-                <div className={styles.rangeTrack} aria-hidden="true">
-                  {copy.rangeSequence.beats.map((b, i) => (
-                    <span key={b.title} data-on={i <= beat ? 'true' : undefined} />
-                  ))}
-                </div>
-                <span className={styles.inspectHint} aria-hidden="true">
-                  {copy.rangeSequence.hint}
-                </span>
-              </div>
-            </div>
-          ) : device ? (
-            /* A hole in the page. The device renders on the fixed canvas
-               behind everything; scrolling this band scrubs it apart. It is
-               deliberately tall — the separation needs room to read as a
-               movement rather than a jump. */
-            <div
-              id={INSPECT_BAND}
-              className={styles.inspectBand}
-              data-scene-window
-              aria-hidden="true"
-            >
-              <span className={styles.inspectHint}>{copy.caseStudy.explodeHint}</span>
-            </div>
-          ) : (
-            <div className="container">
-              <div className={`${styles.visual} ${styles[`accent-${project.accent}`]}`}>
-                <ProjectVisual slug={project.slug} />
-                <span className={styles.visualTag}>
-                  {project.heroConceptual ? copy.caseStudy.conceptualViz : copy.caseStudy.illustrative}
-                </span>
-              </div>
-            </div>
-          )}
+          <div className="container">
+            <ProjectStudio key={project.slug} slug={project.slug} />
+          </div>
         </section>
 
         {/* Everything below the stage is reading matter, so it sits on an

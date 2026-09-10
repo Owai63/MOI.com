@@ -36,7 +36,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Wire, Led, RadioRings, Screws } from '../parts/primitives';
-import { deviceMaterials, ledMaterial } from '../materials';
+import { useDeviceMaterials, ledMaterial } from '../materials';
 import { worldTexture, otaConsoleTexture } from '../textures';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
@@ -133,7 +133,7 @@ export function OtaLink({
   activeRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind, live } = useAssembly(PARTS, activeRef);
   const power = useRef(0);
 
@@ -221,7 +221,7 @@ export function OtaLink({
     const t = state.clock.elapsedTime % T.end;
 
     // the world keeps turning whatever the console is doing
-    if (globe.current) globe.current.rotation.y += d * 0.16;
+    if (globe.current) globe.current.rotation.y = state.clock.elapsedTime * 0.16;
 
     /* the console: armed in cyan while the push is in flight, green once the
        unit has acknowledged it */

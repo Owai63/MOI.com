@@ -20,7 +20,7 @@ import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Led, Wire } from '../parts/primitives';
-import { deviceMaterials } from '../materials';
+import { useDeviceMaterials } from '../materials';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
 import { POWER_GATE, POWER_RATE } from './power';
@@ -69,7 +69,7 @@ export function Wheelchair({
   activeRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind, live } = useAssembly(PARTS, activeRef);
 
   const power = useRef(0);
