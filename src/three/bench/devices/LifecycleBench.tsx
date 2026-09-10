@@ -28,7 +28,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Qfp } from '../parts/Pcb';
 import { Led } from '../parts/primitives';
-import { deviceMaterials, ledMaterial } from '../materials';
+import { useDeviceMaterials, ledMaterial } from '../materials';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
 import { POWER_GATE, POWER_RATE } from './power';
@@ -107,7 +107,7 @@ function InShell({
   mats,
   detail,
 }: {
-  mats: ReturnType<typeof deviceMaterials>;
+  mats: ReturnType<typeof useDeviceMaterials>;
   detail: 'high' | 'low';
 }) {
   return (
@@ -132,7 +132,7 @@ function Sealed({
   mats,
   label,
 }: {
-  mats: ReturnType<typeof deviceMaterials>;
+  mats: ReturnType<typeof useDeviceMaterials>;
   label: THREE.Material;
 }) {
   return (
@@ -160,7 +160,7 @@ export function LifecycleBench({
   activeRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind, live } = useAssembly(PARTS, activeRef);
   const power = useRef(0);
 
@@ -185,7 +185,7 @@ export function LifecycleBench({
   const cursor = useRef(0);
 
   useFrame((state, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const want = sceneState.inspect ? 1 : live.current > POWER_GATE ? sceneState.power : 0;
     power.current = THREE.MathUtils.damp(power.current, want, POWER_RATE, d);
     const p = power.current;

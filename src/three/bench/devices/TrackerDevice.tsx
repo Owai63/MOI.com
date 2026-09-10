@@ -21,7 +21,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Pcb, ShieldedModule, Header, Electrolytic } from '../parts/Pcb';
 import { Shell, Wire, Led, RadioRings, Screws } from '../parts/primitives';
-import { deviceMaterials, WIRE_COLORS } from '../materials';
+import { useDeviceMaterials, WIRE_COLORS } from '../materials';
 import { labelTexture, moduleLabelTexture, type PcbSpec } from '../textures';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
@@ -93,7 +93,7 @@ export function TrackerDevice({
   activeRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const labelMap = useMemo(() => labelTexture(LABEL), []);
   const moduleMap = useMemo(
     () => moduleLabelTexture('ec200u', 'EC200U', 'QUECTEL'),
@@ -112,7 +112,7 @@ export function TrackerDevice({
       power.current,
       want,
       POWER_RATE,
-      Math.min(delta, 1 / 30),
+      Math.min(delta, 0.1),
     );
   });
 

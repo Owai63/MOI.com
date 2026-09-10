@@ -1,13 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useContent, useCopy, useUi } from '../i18n/useContent';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/sections/Footer';
 import { ProjectVisual } from '../components/visuals/ProjectVisual';
 import { TagList } from '../components/ui/TagList';
+import { SceneControls } from '../three/bench/SceneControls';
 import { BenchStage } from '../three/BenchStage';
 import { deviceFor } from '../three/bench/devices/registry';
 import { useLenis } from '../lib/useLenis';
+import { getDeviceProfile } from '../lib/quality';
+import { usePrefersReducedMotion } from '../lib/useMediaQuery';
 import { useInspectScroll, useRangeScroll } from '../lib/useBenchScroll';
 import { NotFound } from './NotFound';
 import styles from './CaseStudy.module.scss';
@@ -36,7 +39,10 @@ export function CaseStudy() {
   /* Projects with a modelled device get the live inspection stage; the rest
      keep their illustrative image. `deviceFor` is the single source of truth
      for which is which — see three/bench/devices/registry.tsx. */
-  const device = deviceFor(slug ?? '');
+  const capability = useMemo(getDeviceProfile, []);
+  const reducedMotion = usePrefersReducedMotion();
+  const liveScene = capability.webgl && capability.tier !== 'low' && !reducedMotion;
+  const device = liveScene ? deviceFor(slug ?? '') : null;
 
   /* The shooting range is the one case study whose subject is a lane rather
      than an object, so it gets the full set and a six-shot sequence instead
@@ -113,6 +119,7 @@ export function CaseStudy() {
                sequence as prose. */
             <div id={RANGE_BAND} className={styles.rangeBand} data-scene-window>
               <div className={styles.rangeSticky}>
+                <SceneControls key={project.slug} slug={project.slug} range />
                 <div className={styles.rangeCaptions}>
                   {copy.rangeSequence.beats.map((b, i) => (
                     <figure
@@ -148,9 +155,8 @@ export function CaseStudy() {
               id={INSPECT_BAND}
               className={styles.inspectBand}
               data-scene-window
-              aria-hidden="true"
             >
-              <span className={styles.inspectHint}>{copy.caseStudy.explodeHint}</span>
+              <SceneControls key={project.slug} slug={project.slug} />
             </div>
           ) : (
             <div className="container">

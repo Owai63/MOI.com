@@ -15,7 +15,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { deviceMaterials } from '../materials';
+import { useDeviceMaterials } from '../materials';
 import { RAIL } from './spec';
 
 /** Rack tooth pitch. Also the pinion's, in TargetRunner. */
@@ -29,7 +29,7 @@ export function Rail({
   length: number;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const half = length / 2;
 
   const sleepers = useMemo(() => {

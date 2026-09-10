@@ -21,7 +21,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Wire, Led, Screws } from '../parts/primitives';
-import { deviceMaterials, ledMaterial } from '../materials';
+import { useDeviceMaterials, ledMaterial } from '../materials';
 import { visionTargetTexture } from '../textures';
 import { useAssembly, type PartSpec } from '../assembly';
 import { sceneState } from '../../sceneState';
@@ -105,7 +105,7 @@ export function VisionRig({
   activeRef: React.MutableRefObject<number>;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind, live } = useAssembly(PARTS, activeRef);
   const power = useRef(0);
 
@@ -131,7 +131,7 @@ export function VisionRig({
   const secondary = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
-    const d = Math.min(delta, 1 / 30);
+    const d = Math.min(delta, 0.1);
     const want = sceneState.inspect ? 1 : live.current > POWER_GATE ? sceneState.power : 0;
     power.current = THREE.MathUtils.damp(power.current, want, POWER_RATE, d);
     const p = power.current;

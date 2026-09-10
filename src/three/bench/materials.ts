@@ -1,3 +1,5 @@
+import { microSurface, disposeSurfaceDetails } from './surfaceDetails';
+import { useEffect, useMemo } from 'react';
 /* ============================================================================
    materials — shared bench materials, and per-device material sets
    ----------------------------------------------------------------------------
@@ -37,6 +39,7 @@ import {
 const owned: THREE.Material[] = [];
 function own<T extends THREE.Material>(m: T): T {
   owned.push(m);
+  m.addEventListener('dispose', () => { const at = owned.indexOf(m); if (at >= 0) owned.splice(at, 1); });
   return m;
 }
 
@@ -50,13 +53,14 @@ const ownedTextures: THREE.Texture[] = [];
 
 /** Dispose every material this module created. */
 export function disposeMaterials() {
-  for (const m of owned) m.dispose();
+  for (const m of [...owned]) m.dispose();
   owned.length = 0;
   for (const t of ownedTextures) t.dispose();
   ownedTextures.length = 0;
   bench = null;
   room = null;
   disposeRoomTextures();
+  disposeSurfaceDetails();
 }
 
 /* --- bench furniture (shared, never faded) -------------------------------- */
@@ -404,8 +408,11 @@ export function deviceMaterials() {
     /** moulded ABS device enclosure */
     abs: own(
       new THREE.MeshStandardMaterial({
-        color: '#17181b',
-        roughness: 0.62,
+        color: '#1d2024',
+        bumpMap: microSurface('polymer'),
+        bumpScale: 0.000035,
+        roughnessMap: microSurface('polymer'),
+        roughness: 0.72,
         metalness: 0.05,
       }),
     ),
@@ -413,6 +420,8 @@ export function deviceMaterials() {
     caseShell: own(
       new THREE.MeshStandardMaterial({
         map: caseShellTexture(),
+        bumpMap: microSurface('polymer'),
+        bumpScale: 0.00008,
         color: '#8f8568',
         roughness: 0.9,
         metalness: 0.02,
@@ -422,7 +431,10 @@ export function deviceMaterials() {
     metal: own(
       new THREE.MeshStandardMaterial({
         map: brushedTexture(),
-        color: '#8f979f',
+        bumpMap: microSurface('metal'),
+        bumpScale: 0.000016,
+        roughnessMap: microSurface('metal'),
+        color: '#a0a8b0',
         // A near-mirror finish on the brackets turned every rim light into a
         // blown highlight; machined aluminium is satin, not chrome.
         roughness: 0.48,
@@ -433,7 +445,9 @@ export function deviceMaterials() {
     steel: own(
       new THREE.MeshStandardMaterial({
         color: '#c2c8ce',
-        roughness: 0.22,
+        bumpMap: microSurface('metal'),
+        bumpScale: 0.000006,
+        roughness: 0.25,
         metalness: 1,
       }),
     ),
@@ -500,3 +514,10 @@ export const WIRE_COLORS = {
   yellow: '#c9a227',
   white: '#c9ced3',
 } as const;
+
+/** Material sets belong to the mounted device, not the history of visited scenes. */
+export function useDeviceMaterials() {
+  const materials = useMemo(deviceMaterials, []);
+  useEffect(() => () => Object.values(materials).forEach(material => material.dispose()), [materials]);
+  return materials;
+}

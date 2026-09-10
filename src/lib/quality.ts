@@ -17,10 +17,10 @@ let cached: DeviceProfile | null = null;
 function detectWebGL(): boolean {
   try {
     const canvas = document.createElement('canvas');
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-    );
+    const context = canvas.getContext('webgl2');
+    const supported = Boolean(context);
+    context?.getExtension('WEBGL_lose_context')?.loseContext();
+    return supported;
   } catch {
     return false;
   }
@@ -59,7 +59,7 @@ export function getDeviceProfile(): DeviceProfile {
     tier = 'medium';
   }
 
-  /* Touch devices pay for the scene twice: the bench is a full-viewport fixed
+  /* Touch devices pay for the scene twice: the homepage is a full-viewport fixed
      canvas, so every frame is both rendered and then composited underneath
      scrolling page content. Capping resolution and dropping MSAA there is the
      difference between a smooth scroll and a stuttering one, and at phone

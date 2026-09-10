@@ -24,7 +24,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Led, Wire } from '../parts/primitives';
-import { deviceMaterials, WIRE_COLORS } from '../materials';
+import { useDeviceMaterials, WIRE_COLORS } from '../materials';
 import { useAssembly, type PartSpec } from '../assembly';
 import { ControllerCase } from './ControllerCase';
 import { Mannequin } from './Mannequin';
@@ -84,7 +84,7 @@ export function TargetRunner({
   travel: number;
   detail?: 'high' | 'low';
 }) {
-  const mats = useMemo(() => deviceMaterials(), []);
+  const mats = useDeviceMaterials();
   const { bind } = useAssembly(PARTS, activeRef);
 
   const body = useRef<THREE.Group>(null);
@@ -101,7 +101,7 @@ export function TargetRunner({
   useEffect(() => () => tyre.dispose(), [tyre]);
 
   useFrame((_, delta) => {
-    const d = Math.max(1 / 240, Math.min(delta, 1 / 30));
+    const d = Math.max(1 / 240, Math.min(delta, 0.1));
     const at = atRef.current;
 
     if (body.current) body.current.position.x = (at - 0.5) * travel;

@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useMemo } from 'react';
 import { getDeviceProfile } from '../lib/quality';
 import { usePrefersReducedMotion } from '../lib/useMediaQuery';
 import { SceneFallback } from './SceneFallback';
+import { resetSceneControls } from './bench/interaction';
 import { resetSceneState } from './sceneState';
 import type { StageMode } from './bench/BenchCanvas';
 
@@ -33,6 +34,7 @@ export function BenchStage({
   // the new one never inherits the old page's camera station or explosion.
   useEffect(() => {
     resetSceneState(mode);
+    resetSceneControls();
   }, [mode, slug]);
 
   // No WebGL, low tier, or reduced-motion → static, calm fallback.

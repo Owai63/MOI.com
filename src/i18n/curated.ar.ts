@@ -1,3 +1,4 @@
+import { studioAr } from '../three/studio/ar';
 /* ============================================================================
    curated.ar — human-approved English→Arabic pairs
    ----------------------------------------------------------------------------
@@ -181,4 +182,5 @@ export const curatedAr: Record<string, string> = {
   "Wireless & Connectivity": "الاتصال اللاسلكي",
   "Work": "الأعمال",
   "العربية": "English",
+  ...studioAr,
 };

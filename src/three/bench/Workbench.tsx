@@ -26,10 +26,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import { sceneControls } from './interaction';
 import { sceneState } from '../sceneState';
 import {
   DEVICES,
-  deviceIndex,
+  deviceFor,
   ROOM_CHAPTERS,
   type DeviceEntry,
   type StageKind,
@@ -125,20 +126,23 @@ function InspectedDevice({ entry, detail }: { entry: DeviceEntry; detail: Detail
     if (!spin.current) return;
     // a slow turntable, plus a nudge from the pointer so the object feels
     // held rather than displayed
-    sceneState.turntable += Math.min(delta, 1 / 30) * 0.16;
-    spin.current.rotation.y =
-      entry.inspect.rotation[1] + sceneState.turntable + sceneState.pointerX * 0.35;
+    if (sceneControls.autoRotate && !sceneControls.paused) sceneState.turntable += Math.min(delta, 0.1) * 0.12;
+    spin.current.rotation.y = THREE.MathUtils.damp(
+      spin.current.rotation.y,
+      entry.inspect.rotation[1] + sceneState.turntable + sceneControls.yaw + sceneState.pointerX * 0.12,
+      10, Math.min(delta, 0.1),
+    );
     spin.current.rotation.x = THREE.MathUtils.damp(
       spin.current.rotation.x,
-      entry.inspect.rotation[0] - sceneState.pointerY * 0.12,
+      entry.inspect.rotation[0] + sceneControls.pitch - sceneState.pointerY * 0.06,
       3,
-      Math.min(delta, 1 / 30),
+      Math.min(delta, 0.1),
     );
   });
 
   return (
     <group position={[0, 0, 0]} scale={entry.inspect.scale}>
-      <group ref={spin}>{entry.render({ activeRef: always, detail })}</group>
+      <group key={entry.slug} ref={spin}>{entry.render({ activeRef: always, detail })}</group>
     </group>
   );
 }
@@ -230,8 +234,7 @@ export function Workbench({
 
   const inspected = useMemo(() => {
     if (mode !== 'inspect' || !slug) return null;
-    const i = deviceIndex(slug);
-    return i >= 0 ? DEVICES[i] : null;
+    return deviceFor(slug);
   }, [mode, slug]);
 
   if (mode === 'range') return <RangeScene detail={detail} />;
